@@ -178,14 +178,16 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
   </div>
 </div>
 
-<!-- GitHub Pages requires proper MIME types for JS files.
-     JSDELIVR CDN serves .js files with correct Content-Type. -->
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+<!-- THREE.JS - Reliable CDN for GitHub Pages -->
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"
+        crossorigin="anonymous"></script>
+<script>
+  // Fallback: if CDN fails, check if THREE loaded
+  if (typeof THREE === 'undefined') {
+    console.error('THREE.JS failed to load from CDN!');
+  } else {
+    console.log('THREE.JS loaded successfully!');
   }
-}
 </script>
 
 <script>
