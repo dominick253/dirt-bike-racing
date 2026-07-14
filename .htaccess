@@ -1,0 +1,11 @@
+# GitHub Pages requires proper MIME types for JS files
+# The browser silently blocks script loading if Content-Type is text/plain
+# Solution: Use a CDN that serves proper MIME types
+
+# Serve .js files as application/javascript
+AddHandler javascript .js
+AddType application/javascript .js
+
+# Cross-origin headers for ES modules
+Header set Cross-Origin-Opener-Policy "same-origin"
+Header set Cross-Origin-Embedder-Policy "require-corp"
