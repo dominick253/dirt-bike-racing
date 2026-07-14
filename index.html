@@ -551,6 +551,9 @@ const Game = {
 
       // Update post effects
       bloomIntensity = Math.min(1, bike.rpm * 0.5);
+
+      // === CRITICAL: Actually render the THREE.JS scene ===
+      this.renderer.render(this.scene, this.camera);
     }
   },
 
