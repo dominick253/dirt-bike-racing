@@ -9,7 +9,7 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',system-ui,sans-serif;color:#e8e8e8;}
 canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;}
 
-/* ===== LOADING SCREEN ===== */
+/* LOADING SCREEN */
 #loading-screen{position:fixed;inset:0;z-index:200;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
 #loading-screen h1{font-size:2rem;color:#ff6a00;font-weight:bold;letter-spacing:.05em;}
@@ -17,10 +17,9 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
 .loader-bar{width:300px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:1rem;overflow:hidden;}
 .loader-bar .fill{height:100%;background:linear-gradient(90deg,#ff6a00,#ff4500);width:0%;transition:width .3s;border-radius:3px;}
 
-/* ===== TITLE SCREEN ===== */
+/* TITLE SCREEN */
 #title-screen{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#0a0a12 0%,#1a0f05 60%,#cc4400 100%);transition:opacity .6s;}
 #title-screen.active{display:flex;}
-#title-screen.hidden{opacity:0;pointer-events:none;}
 .title-logo{text-align:center;margin-bottom:2rem;}
 .title-logo h1{font-size:clamp(2.5rem,8vw,5rem);color:#ff6a00;text-shadow:0 0 40px #ff4500,0 6px 12px rgba(0,0,0,.9);letter-spacing:.08em;font-weight:900;line-height:1;}
 .title-logo .subtitle{font-size:clamp(.9rem,2.5vw,1.4rem);color:#ccc;margin-top:.3em;letter-spacing:.15em;text-transform:uppercase;font-weight:300;}
@@ -35,7 +34,7 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
 .start-prompt{margin-top:2rem;font-size:1.3rem;color:#fff;animation:pulse 1.8s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 
-/* ===== MODE SELECT ===== */
+/* MODE SELECT */
 #mode-select,#bike-garage,#career-screen{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;background:rgba(0,0,0,.92);overflow-y:auto;padding:2rem;}
 #mode-select.active,#bike-garage.active,#career-screen.active{display:flex;}
 .screen-header{text-align:center;margin-bottom:2rem;width:min(700px,90vw);}
@@ -47,8 +46,6 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
 .mode-card .mode-icon{font-size:2.5rem;margin-bottom:.5rem;}
 .mode-card h3{font-size:1rem;color:#ff6a00;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.08em;}
 .mode-card p{font-size:.8rem;color:#888;line-height:1.4;}
-
-/* ===== BIKE GARAGE ===== */
 .bike-list{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;width:min(90vw,900px);margin-bottom:2rem;}
 .bike-card{background:rgba(20,20,20,.92);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:1.5rem;width:260px;text-align:center;transition:border-color .2s,transform .15s;}
 .bike-card:hover{border-color:#ff6a00;}
@@ -59,29 +56,23 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
 .stat-bar label{width:60px;text-align:right;color:#888;}
 .stat-bar .bar{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
 .stat-bar .fill{height:100%;background:linear-gradient(90deg,#ff6a00,#ff4500);border-radius:3px;}
-
-/* ===== CAREER ===== */
 .career-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;width:min(800px,90vw);margin-bottom:2rem;}
 .stat-card{background:rgba(20,20,20,.92);border-radius:10px;padding:1.2rem;text-align:center;}
 .stat-card .stat-value{font-size:1.8rem;font-weight:bold;color:#ff6a00;}
 .stat-card .stat-label{font-size:.75rem;color:#888;text-transform:uppercase;margin-top:.3rem;}
 
-/* ===== HUD ===== */
+/* HUD */
 #hud{position:fixed;inset:0;z-index:50;display:none;pointer-events:none;}
 #hud.active{display:block;}
 .hud-top{display:flex;justify-content:space-between;padding:10px 20px;}
 .hud-box{background:rgba(0,0,0,.65);border:1px solid rgba(255,106,0,.3);border-radius:8px;padding:8px 16px;color:#fff;font-size:.85rem;}
 .hud-box .hud-value{font-size:1.5rem;font-weight:bold;color:#ff6a00;line-height:1;}
 .hud-bottom{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);text-align:center;background:rgba(0,0,0,.5);padding:6px 20px;border-radius:8px;font-size:.85rem;color:#888;}
-.hud-bottom.state-airborne{color:#ffaa00;}
-.hud-bottom.state-wheelie{color:#00ff6a;}
 .minimap-container{position:absolute;bottom:20px;right:20px;width:160px;height:160px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,106,0,.4);background:rgba(0,0,0,.5);}
 .minimap-container canvas{width:100%;height:100%;}
 .position-bar{position:absolute;left:50%;top:60px;transform:translateX(-50%);display:flex;gap:4px;background:rgba(0,0,0,.6);padding:6px 12px;border-radius:8px;}
 .pos-pill{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:bold;color:#fff;background:rgba(255,255,255,.15);}
 .pos-pill.current{background:#ff6a00;box-shadow:0 0 8px #ff4500;}
-
-/* ===== OVERLAYS ===== */
 #lap-flash{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;font-size:clamp(2rem,6vw,3.5rem);color:#ff6a00;font-weight:900;text-shadow:0 0 30px rgba(255,140,0,.8);opacity:0;transition:opacity .3s;pointer-events:none;}
 #lap-flash.show{opacity:1;}
 #countdown-display{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:70;font-size:clamp(4rem,12vw,8rem);font-weight:900;color:#fff;text-shadow:0 0 40px rgba(255,106,0,.8);opacity:0;pointer-events:none;}
@@ -98,14 +89,12 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
 </head>
 <body>
 
-<!-- Loading Screen -->
 <div id="loading-screen">
   <h1>MOTOCROSS MADNESS 3D</h1>
   <div class="sub">Loading...</div>
   <div class="loader-bar"><div class="fill" id="loader-fill"></div></div>
 </div>
 
-<!-- Title Screen -->
 <div id="title-screen">
   <div class="title-logo">
     <h1>MOTOCROSS MADNESS 3D</h1>
@@ -120,12 +109,11 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
   <div class="controls-info">
     <kbd>W</kbd> Throttle &nbsp; <kbd>S</kbd> Brake &nbsp; <kbd>A/D</kbd> Steer &nbsp;
     <kbd>Space</kbd> Wheelie &nbsp; <kbd>Shift</kbd> Compression<br>
-    Click to lock mouse for camera orbit • Gamepad: LT/RT, A/B, X/Y, LStick
+    Click to lock mouse for camera orbit
   </div>
   <div class="start-prompt">Click "Start Race" or press any key</div>
 </div>
 
-<!-- Mode Select -->
 <div id="mode-select">
   <button class="back-btn" onclick="UI.hideScreen('mode-select')">← Back</button>
   <div class="screen-header"><h1>SELECT GAME MODE</h1><p>Choose your challenge</p></div>
@@ -138,21 +126,18 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
   </div>
 </div>
 
-<!-- Bike Garage -->
 <div id="bike-garage">
   <button class="back-btn" onclick="UI.hideScreen('bike-garage')">← Back</button>
   <div class="screen-header"><h1>BIKE GARAGE</h1><p>Select your ride — unlock more by racing!</p></div>
   <div class="bike-list" id="bike-list"></div>
 </div>
 
-<!-- Career Dashboard -->
 <div id="career-screen">
   <button class="back-btn" onclick="UI.hideScreen('career-screen')">← Back</button>
   <div class="screen-header"><h1>CAREER DASHBOARD</h1><p>Your racing legacy</p></div>
   <div class="career-stats" id="career-stats"></div>
 </div>
 
-<!-- In-game HUD -->
 <div id="hud">
   <div class="hud-top">
     <div class="hud-box"><div class="hud-value" id="hud-speed">0</div><div>KM/H</div></div>
@@ -165,11 +150,9 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
   <div class="hud-bottom" id="hud-state">READY</div>
 </div>
 
-<!-- Flash overlays -->
 <div id="lap-flash"></div>
 <div id="countdown-display"></div>
 
-<!-- Race Complete Overlay -->
 <div id="race-complete">
   <div class="race-result">
     <h2>RACE COMPLETE</h2>
@@ -178,134 +161,355 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:
   </div>
 </div>
 
-<!-- THREE.JS - Reliable CDN for GitHub Pages -->
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"
-        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-  // Fallback: if CDN fails, check if THREE loaded
-  if (typeof THREE === 'undefined') {
-    console.error('THREE.JS failed to load from CDN!');
-  } else {
-    console.log('THREE.JS loaded successfully!');
+console.log('🏁 MX3D INITIALIZING...');
+
+// ===== INPUT SYSTEM =====
+const keys = {};
+let cameraYaw = 0, cameraPitch = 0.2, isPointerLocked = false;
+function initInput() {
+  document.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
+  document.addEventListener('keyup', e => { keys[e.code] = false; });
+  document.addEventListener('pointerlockchange', () => { isPointerLocked = !!document.pointerLockElement; });
+  document.addEventListener('mousemove', e => {
+    if (isPointerLocked) {
+      cameraYaw -= e.movementX * 0.002;
+      cameraPitch -= e.movementY * 0.002;
+      cameraPitch = Math.max(-1.2, Math.min(1.2, cameraPitch));
+    }
+  });
+  document.addEventListener('click', () => {
+    if (!isPointerLocked && Game.state === 'racing') {
+      document.body.requestPointerLock();
+    }
+  });
+}
+function getInputState() {
+  return {
+    throttle: keys['KeyW'] || keys['ArrowUp'] ? 1 : 0,
+    brake: keys['KeyS'] || keys['ArrowDown'] ? 1 : 0,
+    steer: (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) - (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0),
+    wheelie: keys['Space'] ? 1 : 0,
+    compression: keys['ShiftLeft'] || keys['ShiftRight'] ? 1 : 0
+  };
+}
+
+// ===== BIKE PHYSICS =====
+const WHEEL_R = 0.38, BIKE_MASS = 180;
+let bike = { x:0, y:0, z:0, vx:0, vy:0, vz:0, yaw:0, pitch:0, speed:0, rpm:0 };
+const TRACK_RADIUS = 170, GROUND_Y = 0;
+
+function getTerrainHeight(x, z) {
+  const d = Math.sqrt(x*x + z*z);
+  const n1 = Math.sin(x*0.02)*Math.cos(z*0.02)*3;
+  const n2 = Math.sin(x*0.05+1)*Math.cos(z*0.03+2)*1.5;
+  const jump = d > TRACK_RADIUS-20 ? Math.max(0, (d-(TRACK_RADIUS-20))/20)*5 : 0;
+  return GROUND_Y + n1 + n2 + jump;
+}
+
+function initBike() {
+  bike.x = TRACK_RADIUS;
+  bike.y = getTerrainHeight(bike.x, bike.z) + WHEEL_R;
+  bike.z = 0;
+  bike.yaw = -Math.PI/2;
+  bike.pitch = 0;
+  bike.speed = 0;
+  bike.rpm = 0;
+  bike.lap = 0;
+  bike.checkpoint = 0;
+  bike.lapStart = 0;
+  return { x: bike.x, y: bike.y, z: bike.z };
+}
+
+function updatePhysics(dt, input) {
+  const maxSpeed = 25;
+  const accel = 15;
+  const brakeForce = 20;
+  const steerSpeed = 2.5;
+  const friction = 0.98;
+
+  // Engine force
+  let engineForce = 0;
+  if (input.throttle) engineForce = accel;
+  if (input.brake) engineForce = -brakeForce;
+  if (!input.throttle && !input.brake) engineForce = 0;
+
+  // Apply forces
+  bike.vx += Math.cos(bike.yaw) * engineForce * dt;
+  bike.vz += Math.sin(bike.yaw) * engineForce * dt;
+
+  // Steering
+  if (Math.abs(bike.speed) > 0.5) {
+    bike.yaw += input.steer * steerSpeed * dt * Math.min(Math.abs(bike.speed)/5, 1);
   }
-</script>
 
-<script>
-// ============================================================
-// MOTOCROSS MADNESS 3D — Remastered
-// Main entry point — wires all modules together
-// ============================================================
+  // Friction
+  bike.vx *= friction;
+  bike.vz *= friction;
 
-import { init as InputInit, getInputState, resetInput } from './core/input.js';
-import { GameEngine } from './core/engine.js';
-import { SimplexNoise, simplex } from './core/noise.js';
-import { createBikeModel } from './physics/bike-model.js';
-import { updatePhysics, initBike } from './physics/physics-solver.js';
-import { CrashSystem } from './physics/crash-system.js';
-import { WorldManager } from './world/world-manager.js';
-import { registerMode, getGameModeLogic, RaceState } from './game/modes/mode-manager.js';
-import { CareerManager, calculateEarnings, getTotalTime } from './game/career/manager.js';
-import { saveCareer, loadCareer } from './utils/save-system.js';
-import { CameraSystem } from './render/camera-system.js';
-import { emitDust, emitSparks, emitTireSmoke, emitLandingDust, updateParticles } from './render/particles.js';
-import { PostEffectsInstance } from './render/post-effects.js';
-import { start as countdownStart } from './game/countdown.js';
-import * as UI from './ui/hud/dashboard.js';
-import * as TitleScreen from './ui/screens/title-screen.js';
-import { EngineAudio } from './audio/engine-audio.js';
+  // Update position
+  bike.x += bike.vx * dt;
+  bike.z += bike.vz * dt;
 
-// ==================== GLOBAL CONSTANTS ====================
-const MAX_SPEED_KMH = 280;
+  // Terrain following
+  const terrainY = getTerrainHeight(bike.x, bike.z);
+  bike.y = terrainY + WHEEL_R;
+
+  // Speed
+  bike.speed = Math.sqrt(bike.vx*bike.vx + bike.vz*bike.vz);
+  bike.rpm = Math.min(1, bike.speed / maxSpeed);
+
+  // Wheelie
+  if (input.wheelie) {
+    bike.pitch = Math.min(bike.pitch + 2*dt, 0.3);
+  } else if (input.compression) {
+    bike.pitch = Math.max(bike.pitch - 2*dt, -0.15);
+  } else {
+    bike.pitch *= 0.9;
+  }
+
+  // Lap tracking
+  const angle = Math.atan2(bike.z, bike.x);
+  if (bike.checkpoint === 0 && angle > -0.5 && angle < 0.5) bike.checkpoint = 1;
+  if (bike.checkpoint === 1 && angle > Math.PI-0.5 || angle < -Math.PI+0.5) {
+    bike.checkpoint = 2;
+  }
+  if (bike.checkpoint === 2 && angle > 0.5) {
+    bike.lap++;
+    bike.checkpoint = 0;
+    Game.onLapComplete(bike.lap);
+  }
+
+  // Clamp to world
+  const dist = Math.sqrt(bike.x*bike.x + bike.z*bike.z);
+  if (dist > WORLD_SIZE) {
+    const scale = WORLD_SIZE / dist;
+    bike.x *= scale;
+    bike.z *= scale;
+  }
+}
+
 const WORLD_SIZE = 600;
-const TRACK_RADIUS = 170;
 
-// ==================== MAIN GAME OBJECT ====================
+// ===== CAMERA =====
+let camera = { mode: 'chase', shake: 0 };
+function updateCamera() {
+  const targetX = bike.x + Math.cos(bike.yaw) * 8;
+  const targetY = bike.y + 4;
+  const targetZ = bike.z + Math.sin(bike.yaw) * 8;
+  Game.camera.position.lerp({x:targetX, y:targetY, z:targetZ}, 0.1);
+  const lookX = bike.x + Math.cos(bike.yaw) * 5;
+  const lookY = bike.y + 1;
+  const lookZ = bike.z + Math.sin(bike.yaw) * 5;
+  const lookTarget = new THREE.Vector3(lookX, lookY, lookZ);
+  if (Game.camera) Game.camera.lookAt(lookTarget);
+}
+
+// ===== PARTICLES =====
+let particles = [];
+function emitDust(x, y, z) {
+  for (let i = 0; i < 3; i++) {
+    particles.push({
+      x, y, z, vx: (Math.random()-0.5)*2, vy: Math.random()*2, vz: (Math.random()-0.5)*2,
+      life: 1, size: Math.random()*0.5+0.2
+    });
+  }
+}
+function updateParticles(dt) {
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx*dt; p.y += p.vy*dt; p.z += p.vz*dt;
+    p.vy -= 3*dt; p.life -= dt*2;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+// ===== POST EFFECTS (simple bloom approximation) =====
+let bloomIntensity = 0;
+
+// ===== GAME ENGINE =====
 const Game = {
-  scene: null,
-  camera: null,
-  renderer: null,
-  clock: null,
-  engine: null,
-  world: null,
-  state: 'title', // 'title' | 'countdown' | 'racing' | 'ended'
-  activeMode: null,
-  selectedBike: 'mx450',
-  career: null,
-  bikeGroup: null,
-
+  scene: null, camera: null, renderer: null, clock: null,
+  state: 'title', activeMode: 'national',
+  career: JSON.parse(localStorage.getItem('mx3d_career') || '{"totalRaces":0,"racesWon":0,"racesPodium":0,"unlockedBikes":["mx450"],"earnings":0,"results":[]}'),
+  bikeModel: null, terrain: null, sky: null,
   bikes: [
     { id:'mx450', name:'MX-450 Pro', stats:{speed:7,acceleration:8,handling:6}, unlocked:true },
     { id:'zx250', name:'ZX-250 R', stats:{speed:5,acceleration:9,handling:7}, unlocked:false },
     { id:'dr800', name:'DR-800 Monster', stats:{speed:8,acceleration:5,handling:4}, unlocked:false },
     { id:'fx310', name:'FX-310 Classic', stats:{speed:5,acceleration:7,handling:8}, unlocked:false }
   ],
+  selectedBike: 'mx450',
 
-  // ===== INITIALIZATION =====
-  async init() {
-    console.log('🚀 Game.init() starting...');
+  init: function() {
+    console.log('🚀 Creating renderer...');
     const loader = document.getElementById('loader-fill');
 
-    // Load career data
-    this.career = loadCareer();
-    CareerManager.init();
-    InputInit();
-    EngineAudio.init();
-    console.log('✅ Core systems loaded');
-
-    // Create WebGL renderer
-    const canvas = document.createElement('canvas');
-    canvas.id = 'game-canvas';
-    document.body.insertBefore(canvas, document.body.firstChild);
-    console.log('✅ Renderer created');
-
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
-    console.log('✅ Renderer configured');
+    this.renderer.setClearColor(0x87CEEB);
+    document.body.appendChild(this.renderer.domElement);
+    console.log('✅ Renderer created');
 
-    // Create scene and camera
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.5, 800);
+    this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.003);
+    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.5, 800);
     this.clock = new THREE.Clock();
-    console.log('✅ Scene and camera created');
+    console.log('✅ Scene created');
 
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x404060, 0.6);
+    this.scene.add(ambient);
+    const sun = new THREE.DirectionalLight(0xffffee, 1.2);
+    sun.position.set(50, 100, 50);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 300;
+    sun.shadow.camera.left = -100;
+    sun.shadow.camera.right = 100;
+    sun.shadow.camera.top = 100;
+    sun.shadow.camera.bottom = -100;
+    this.scene.add(sun);
+
+    // Sky
+    const skyGeo = new THREE.SphereGeometry(400, 32, 32);
+    const skyMat = new THREE.MeshBasicMaterial({ side: THREE.BackSide, color: 0x87CEEB });
+    this.sky = new THREE.Mesh(skyGeo, skyMat);
+    this.scene.add(this.sky);
+
+    // Terrain
     loader.style.width = '30%';
-
-    // Build world (terrain, sky, vegetation)
-    this.world = new WorldManager(this.scene);
-    await this.world.init();
-    console.log('✅ World built');
+    console.log('🏔️ Building terrain...');
+    const terrainGeo = new THREE.PlaneGeometry(WORLD_SIZE*2, WORLD_SIZE*2, 200, 200);
+    terrainGeo.rotateX(-Math.PI/2);
+    const positions = terrainGeo.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i], z = positions[i+2];
+      positions[i+1] = getTerrainHeight(x, z);
+    }
+    terrainGeo.computeVertexNormals();
+    const terrainMat = new THREE.MeshStandardMaterial({
+      color: 0x8B7355, roughness: 0.9, metalness: 0.0,
+      flatShading: true
+    });
+    this.terrain = new THREE.Mesh(terrainGeo, terrainMat);
+    this.terrain.receiveShadow = true;
+    this.scene.add(this.terrain);
+    console.log('✅ Terrain created');
     loader.style.width = '60%';
 
-    // Create and position bike
-    createBikeModel(this.scene, this.selectedBike);
-    const bikeData = initBike();
-    console.log('✅ Bike created at', bikeData.x, bikeData.y, bikeData.z);
+    // Vegetation
+    const treeGeo = new THREE.ConeGeometry(1.5, 5, 6);
+    const treeMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8 });
+    const trunkGeo = new THREE.CylinderGeometry(0.3, 0.3, 2, 6);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a3a1a });
+    const treeInstanced = new THREE.InstancedMesh(treeGeo, treeMat, 200);
+    const trunkInstanced = new THREE.InstancedMesh(trunkGeo, trunkMat, 200);
+    const dummy = new THREE.Object3D();
+    let idx = 0;
+    for (let i = 0; i < 500 && idx < 200; i++) {
+      const x = (Math.random()-0.5) * WORLD_SIZE * 1.8;
+      const z = (Math.random()-0.5) * WORLD_SIZE * 1.8;
+      if (Math.sqrt(x*x+z*z) < TRACK_RADIUS + 30) continue;
+      dummy.position.set(x, getTerrainHeight(x,z)+3.5, z);
+      dummy.scale.setScalar(0.8 + Math.random()*0.5);
+      dummy.updateMatrix();
+      treeInstanced.setMatrixAt(idx, dummy.matrix);
+      dummy.position.y = getTerrainHeight(x,z)+1;
+      dummy.scale.setScalar(1);
+      dummy.updateMatrix();
+      trunkInstanced.setMatrixAt(idx, dummy.matrix);
+      idx++;
+    }
+    treeInstanced.count = idx;
+    trunkInstanced.count = idx;
+    treeInstanced.castShadow = true;
+    treeInstanced.receiveShadow = true;
+    this.scene.add(treeInstanced);
+    this.scene.add(trunkInstanced);
+    console.log('🌲 Vegetation added');
+    loader.style.width = '75%';
+
+    // Race track
+    const trackGeo = new THREE.TorusGeometry(TRACK_RADIUS, 8, 8, 64);
+    trackGeo.rotateX(-Math.PI/2);
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+    const track = new THREE.Mesh(trackGeo, trackMat);
+    track.position.y = 0.05;
+    track.receiveShadow = true;
+    this.scene.add(track);
+    console.log('🏁 Track added');
     loader.style.width = '85%';
 
-    // Initialize subsystems
-    this.engine = new GameEngine(this.scene);
-    CameraSystem.init(this.scene, this.camera);
-    CameraSystem.setTarget(new THREE.Vector3(bikeData.x, bikeData.y, bikeData.z));
-    CrashSystem.init(this.scene);
-    PostEffectsInstance.init(this.renderer, this.scene, this.camera);
-    console.log('✅ All subsystems initialized');
+    // Checkpoint markers
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      const px = Math.cos(angle) * TRACK_RADIUS;
+      const pz = Math.sin(angle) * TRACK_RADIUS;
+      const markerGeo = new THREE.BoxGeometry(0.5, 4, 0.5);
+      const markerMat = new THREE.MeshBasicMaterial({ color: i===0 ? 0x00ff00 : 0xff0000 });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      marker.position.set(px, getTerrainHeight(px,pz)+2, pz);
+      this.scene.add(marker);
+    }
+    console.log('🏁 Checkpoints added');
 
-    loader.style.width = '100%';
+    // Bike model
+    console.log('🏍️ Creating bike...');
+    const bikeGroup = new THREE.Group();
+    const bodyGeo = new THREE.BoxGeometry(1.8, 0.6, 0.5);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xff4500, roughness: 0.4, metalness: 0.6 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.8;
+    body.castShadow = true;
+    bikeGroup.add(body);
+    const seatGeo = new THREE.BoxGeometry(0.8, 0.3, 0.5);
+    const seatMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const seat = new THREE.Mesh(seatGeo, seatMat);
+    seat.position.set(0, 1.1, 0);
+    bikeGroup.add(seat);
+    const wheelGeo = new THREE.TorusGeometry(0.38, 0.1, 8, 16);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    const frontWheel = new THREE.Mesh(wheelGeo, wheelMat);
+    frontWheel.position.set(0.9, 0.38, 0);
+    frontWheel.rotation.y = Math.PI/2;
+    bikeGroup.add(frontWheel);
+    const rearWheel = new THREE.Mesh(wheelGeo, wheelMat);
+    rearWheel.position.set(-0.9, 0.38, 0);
+    rearWheel.rotation.y = Math.PI/2;
+    bikeGroup.add(rearWheel);
+    const handlebarGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
+    const handlebarMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 });
+    const handlebar = new THREE.Mesh(handlebarGeo, handlebarMat);
+    handlebar.position.set(0.6, 1.2, 0);
+    handlebar.rotation.z = Math.PI/2;
+    bikeGroup.add(handlebar);
+    this.scene.add(bikeGroup);
+    this.bikeModel = bikeGroup;
+    console.log('✅ Bike created');
+    loader.style.width = '95%';
+
+    // Initialize bike state
+    initBike();
+    this.camera.position.set(bike.x+8, bike.y+4, bike.z+8);
+    this.camera.lookAt(bike.x, bike.y, bike.z);
 
     // Hide loading, show title
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) loadingScreen.classList.add('hidden');
-    const titleScreen = document.getElementById('title-screen');
-    if (titleScreen) titleScreen.classList.add('active');
+    loader.style.width = '100%';
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('title-screen').classList.add('active');
+    console.log('🏁 Game initialized and running!');
 
-    // Setup resize handler
+    // Resize handler
     window.addEventListener('resize', () => {
-      if (!this.renderer) return;
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
@@ -313,167 +517,223 @@ const Game = {
 
     // Start game loop
     this.gameLoop();
-    console.log('🏁 Game initialized and running!');
   },
 
-  // ===== MAIN GAME LOOP =====
-  gameLoop() {
+  gameLoop: function() {
     requestAnimationFrame(() => this.gameLoop());
     const dt = Math.min(this.clock.getDelta(), 0.05);
 
     if (this.state === 'racing') {
-      // Get player input
-      const inp = getInputState();
+      const input = getInputState();
+      updatePhysics(dt, input);
 
-      // Update physics
-      updatePhysics(dt, inp, this.scene);
-      this.engine.update(dt);
+      // Update bike mesh
+      if (this.bikeModel) {
+        this.bikeModel.position.set(bike.x, bike.y, bike.z);
+        this.bikeModel.rotation.y = bike.yaw;
+        this.bikeModel.rotation.z = -bike.pitch;
+      }
 
-      // Update particles and effects
+      // Update camera
+      updateCamera();
+
+      // Update particles
+      if (bike.speed > 5 && Math.random() < 0.3) {
+        emitDust(bike.x - Math.cos(bike.yaw)*1, bike.y-0.3, bike.z - Math.sin(bike.yaw)*1);
+      }
       updateParticles(dt);
-      PostEffectsInstance.update(dt);
 
-      // Update engine audio
-      const speedMs = Math.abs(this.engine.getBikeSpeed() || 0);
-      EngineAudio.update(inp.throttle, speedMs * 3.6 / MAX_SPEED_KMH);
+      // Render particles
+      this.renderParticles();
 
       // Update HUD
-      UI.updateHUD(dt, inp);
+      UI.updateHUD(dt);
 
-      // Update active game mode logic
-      if (this.activeMode) {
-        const modeLogic = getGameModeLogic(this.activeMode);
-        if (modeLogic && modeLogic.update) {
-          modeLogic.update(dt, inp, this.engine.bikeState);
-        }
-
-        // Check if race is complete
-        if (modeLogic.isComplete && modeLogic.isComplete()) {
-          this.finishRace();
-        }
-      }
+      // Update post effects
+      bloomIntensity = Math.min(1, bike.rpm * 0.5);
     }
   },
 
-  // ===== RACE FLOW =====
-  startNewRace() {
+  renderParticles: function() {
+    // Remove old particle meshes
+    const oldParticles = this.scene.children.filter(c => c.userData && c.userData.particle);
+    oldParticles.forEach(p => this.scene.remove(p));
+    particles.forEach(p => {
+      if (p.life > 0) {
+        const geo = new THREE.SphereGeometry(p.size, 4, 4);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x888866, transparent: true, opacity: p.life * 0.5 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(p.x, p.y, p.z);
+        mesh.userData.particle = true;
+        this.scene.add(mesh);
+      }
+    });
+  },
+
+  startNewRace: function() {
     this.startRace('national');
   },
 
-  startRace(mode) {
+  startRace: function(mode) {
+    console.log('🏁 Starting race:', mode);
     this.activeMode = mode;
     this.state = 'countdown';
     UI.showHUD(true);
-    TitleScreen.hide();
+    document.getElementById('title-screen').classList.remove('active');
 
-    // Start countdown: 3-2-1-GO
-    countdownStart(() => {
-      this.state = 'racing';
-      console.log('🏁 RACE START — Mode:', mode);
+    // Countdown
+    const display = document.getElementById('countdown-display');
+    const count = 3;
+    let c = count;
+    display.textContent = c;
+    display.classList.add('show');
 
-      // Initialize race state for this mode
-      const modeLogic = getGameModeLogic(mode);
-      if (modeLogic && modeLogic.onStart) {
-        modeLogic.onStart();
+    const interval = setInterval(() => {
+      c--;
+      if (c > 0) {
+        display.textContent = c;
+      } else if (c === 0) {
+        display.textContent = 'GO!';
+      } else {
+        clearInterval(interval);
+        display.classList.remove('show');
+        this.state = 'racing';
+        console.log('🏁 RACE START!');
       }
-    });
+    }, 1000);
   },
 
-  finishRace() {
+  onLapComplete: function(lap) {
+    const flash = document.getElementById('lap-flash');
+    flash.textContent = `LAP ${lap} COMPLETE!`;
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 2000);
+  },
+
+  finishRace: function() {
     this.state = 'ended';
+    UI.hideHUD();
 
-    const modeLogic = getGameModeLogic(this.activeMode);
-    const results = modeLogic?.getResults?.(this.engine.bikeState) || null;
+    const time = (this.clock.getElapsedTime() - (bike.lapStart || 0));
+    const earnings = this.activeMode === 'stunt' ? 1000 : 500;
 
-    // Calculate earnings based on performance
-    let earnings = 0;
-    if (results) {
-      switch (this.activeMode) {
-        case 'national': earnings = calculateEarnings(results.position, this.activeMode); break;
-        case 'stunt': earnings = results.score > 5000 ? 1500 : results.score > 2000 ? 800 : 300; break;
-        case 'baja': earnings = results.accuracy >= 0.9 ? 1000 : results.accuracy >= 0.7 ? 600 : 300; break;
-        case 'enduro': earnings = Math.min(1500, (results.totalLaps || this.engine.bikeState?.lapCount || 0) * 200); break;
-        case 'supercross': earnings = calculateEarnings(results.position, this.activeMode); break;
-      }
-    } else {
-      earnings = 100; // Minimum participation reward
-    }
+    // Save career
+    this.career.totalRaces++;
+    this.career.racesWon++;
+    this.career.earnings += earnings;
+    this.career.results.push({ mode: this.activeMode, time: time, earnings: earnings });
+    localStorage.setItem('mx3d_career', JSON.stringify(this.career));
 
-    // Save to career
-    CareerManager.addResult(this.activeMode, results?.position || 1, results?.time || 0, earnings);
+    // Show results
+    const details = document.getElementById('race-result-details');
+    details.innerHTML = `
+      <p>🏁 Mode: <strong>${this.activeMode}</strong></p>
+      <p>⏱️ Time: <strong>${(time/60).toFixed(1)} min</strong></p>
+      <p>🏅 Laps: <strong>${bike.lap}</strong></p>
+      <p>💰 Earnings: <strong>$${earnings}</strong></p>
+      <p>📊 Total Earnings: <strong>$${this.career.earnings}</strong></p>
+    `;
+    document.getElementById('race-complete').classList.add('show');
+  }
+};
 
-    // Show results overlay
-    UI.showRaceComplete({
-      mode: this.activeMode,
-      position: results?.position || 1,
-      time: results?.time || 0,
-      totalLaps: results?.totalLaps || this.engine.bikeState?.lapCount || 0,
-      score: results?.score,
-      earnings: earnings
-    });
+// ===== UI SYSTEM =====
+const UI = {
+  showHUD: function(active) {
+    document.getElementById('hud').classList.toggle('active', active);
   },
 
-  // ===== GARAGE =====
-  buildGarage() {
-    const bikeListEl = document.getElementById('bike-list');
-    if (!bikeListEl) return;
+  hideHUD: function() {
+    this.showHUD(false);
+  },
 
-    bikeListEl.innerHTML = '';
+  showModeSelect: function() {
+    document.getElementById('mode-select').classList.add('active');
+    document.getElementById('title-screen').classList.remove('active');
+  },
 
-    this.bikes.forEach(bike => {
-      const unlocked = this.career?.unlockedBikes?.includes(bike.id) || bike.unlocked;
-      const selected = this.selectedBike === bike.id;
+  showBikeGarage: function() {
+    document.getElementById('bike-garage').classList.add('active');
+    this.buildGarage();
+  },
 
+  showCareerScreen: function() {
+    document.getElementById('career-screen').classList.add('active');
+    this.buildCareerScreen();
+  },
+
+  hideScreen: function(id) {
+    document.getElementById(id).classList.remove('active');
+    document.getElementById('race-complete').classList.remove('show');
+  },
+
+  buildGarage: function() {
+    const list = document.getElementById('bike-list');
+    list.innerHTML = '';
+    Game.bikes.forEach(bike => {
+      const unlocked = Game.career.unlockedBikes.includes(bike.id);
+      const selected = Game.selectedBike === bike.id;
       const card = document.createElement('div');
       card.className = `bike-card${selected ? ' selected' : ''}${!unlocked ? ' locked' : ''}`;
-
-      let statsHtml = '';
+      let stats = '';
       Object.entries(bike.stats).forEach(([key, value]) => {
-        const label = key.charAt(0).toUpperCase() + key.slice(1);
-        statsHtml += `<div class="stat-bar"><label>${label}</label><div class="bar"><div class="fill" style="width:${value*10}%"></div></div></div>`;
+        stats += `<div class="stat-bar"><label>${key}</label><div class="bar"><div class="fill" style="width:${value*10}%"></div></div></div>`;
       });
-
-      card.innerHTML = `
-        <div class="bike-name">${unlocked ? bike.name : '🔒 LOCKED'}</div>
-        ${statsHtml}
-      `;
-
+      card.innerHTML = `<div class="bike-name">${unlocked ? bike.name : '🔒 LOCKED'}</div>${stats}`;
       if (unlocked) {
         card.addEventListener('click', () => {
-          this.selectedBike = bike.id;
-          document.querySelectorAll('.bike-card').forEach(c => c.classList.remove('selected'));
+          Game.selectedBike = bike.id;
+          list.querySelectorAll('.bike-card').forEach(c => c.classList.remove('selected'));
           card.classList.add('selected');
         });
       }
-
-      bikeListEl.appendChild(card);
+      list.appendChild(card);
     });
   },
 
-  // Expose to global for HTML onclick handlers
-  startNewRace: () => Game.startNewRace(),
-  startRace: (mode) => Game.startRace(mode),
+  buildCareerScreen: function() {
+    const stats = document.getElementById('career-stats');
+    const c = Game.career;
+    stats.innerHTML = `
+      <div class="stat-card"><div class="stat-value">${c.totalRaces}</div><div class="stat-label">Total Races</div></div>
+      <div class="stat-card"><div class="stat-value">${c.racesWon}</div><div class="stat-label">Races Won</div></div>
+      <div class="stat-card"><div class="stat-value">${c.racesPodium}</div><div class="stat-label">Podiums</div></div>
+      <div class="stat-card"><div class="stat-value">$${c.earnings}</div><div class="stat-label">Earnings</div></div>
+      <div class="stat-card"><div class="stat-value">${c.unlockedBikes.length}/${Game.bikes.length}</div><div class="stat-label">Bikes Unlocked</div></div>
+    `;
+  },
+
+  updateHUD: function(dt) {
+    const speed = Math.round(bike.speed * 11.2); // km/h approximation
+    document.getElementById('hud-speed').textContent = speed;
+    document.getElementById('hud-gear').textContent = bike.speed < 1 ? 'N' : Math.min(6, Math.floor(bike.speed/4)+1);
+    document.getElementById('hud-lap').textContent = `${bike.lap}/3`;
+    const time = this.clock ? this.clock.getElapsedTime() : 0;
+    const mins = Math.floor(time/60);
+    const secs = (time%60).toFixed(1);
+    document.getElementById('hud-time').textContent = `${mins}:${secs.padStart(4,'0')}`;
+    document.getElementById('hud-state').textContent = bike.speed > 10 ? '🔥 HIGH SPEED' : bike.speed > 0 ? 'RACING' : 'READY';
+  }
 };
+
+// Store clock reference on UI
+UI.clock = Game ? Game.clock : { getElapsedTime: () => 0 };
 
 // Make accessible globally
 window.Game = Game;
 window.UI = UI;
-window.BikeManager = {
-  data: Game.bikes,
-  getAll: () => Game.bikes,
-  getSelected: () => Game.selectedBike,
-};
 
-// Boot the game when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🏍️ DOM ready, booting game...');
-  Game.init();
-});
-
-// Also boot immediately if DOM already loaded
+// Boot when DOM ready
 if (document.readyState !== 'loading') {
-  console.log('🏍️ DOM already loaded, booting game...');
+  console.log('🏍️ DOM ready, booting game...');
+  initInput();
   Game.init();
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🏍️ DOM loaded, booting game...');
+    initInput();
+    Game.init();
+  });
 }
 </script>
 </body>
