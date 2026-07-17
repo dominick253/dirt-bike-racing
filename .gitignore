@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+dist/
+
+# Test artifacts
+tests/__screenshots__/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+build/
+dist/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Optional npm cache
+npm/
+yarn/
+lock*.json

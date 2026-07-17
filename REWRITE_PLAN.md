@@ -1,345 +1,359 @@
-# MOTOCROSS MADNESS 3D — Complete Rewrite Plan
+# Dirt Bike Racing 3D — Rewrite Plan v4.0
 
-## Vision: "The Best Dirt Bike Game on the Web"
+## Current State Assessment
 
-A single-file HTML5 game that looks, feels, and plays like a premium mobile racing game — but runs in any browser with zero dependencies beyond Three.js r128 CDN.
+### What Works (Green)
+- **Build pipeline**: Vite + TypeScript + Terser builds cleanly (6.27kB HTML + 473kB JS)
+- **Tests**: 12 Vitest tests pass (jsdom environment, browser mode)
+- **Noise generator**: Simplex noise with LUT + FBM works correctly
+- **Terrain heightmap**: Bilinear interpolation sampling works
+- **Basic physics**: Acceleration/brake/steer loop runs
+- **Camera chase**: Basic lerp-based chase cam with FOV scaling
+- **Particle pool**: Object pooling for 200 particles works
+- **UI screens**: Loading bar, title screen, countdown DOM all present
+- **CI/CD**: GitHub Actions workflow configured
+
+### What's Broken / Janky (Red)
+- **No bike model**: `createBike()` doesn't exist — no 3D bike mesh is ever created
+- **No track mesh**: `createTrack()` doesn't exist — no track geometry rendered
+- **Physics is stub**: No suspension, no slope adaptation, no ground collision, no air control
+- **Terrain is flat**: 100x100 grid with noise height — no track carved into it
+- **Vegetation is placeholder**: Random cone trees on flat terrain, no track integration
+- **No audio**: Web Audio API never implemented (UI click handlers use `alert()`)
+- **No lap tracking**: No checkpoints, no finish condition, no lap counter logic
+- **No AI opponents**: AI module never created
+- **No minimap**: HTML element exists but never rendered to
+- **No mobile controls**: Touch joystick never implemented
+- **No career persistence**: localStorage save/load never implemented
+- **No bike 3D model**: No geometry, no materials, no bike mesh at all
+- **No sky**: No sky dome, no gradient, no atmospheric effects
+- **No post-processing**: No bloom, no tone mapping beyond basic
+- **State machine broken**: Title screen buttons use `alert()` instead of real navigation
+- **No game loop state**: No loading → title → countdown → race → results transitions
+- **No bike selection**: Garage screen is `alert('Bike selection would open here')`
+- **No career mode**: Career screen is `alert('Career mode would open here')`
+- **No rendering of bike**: `renderer.render(scene, camera)` is called but nothing bike-shaped exists
+- **No track visual**: Track is never rendered — just a flat noise terrain
+- **No track boundaries**: No curbs, no barriers, no track markers
+- **No ramp/jump geometry**: Terrain is uniform noise, no track carving
+- **No bike animation**: No wheel rotation, no suspension animation, no lean-into-turn
+- **No particle rendering**: Particles exist in pool but never rendered to screen
+- **No HUD updates**: Speed/gear/lap displayed but never populated with real data
+- **No sound**: Zero audio implementation
+
+### Root Causes
+1. **Skeleton project**: The current code is a skeleton with stub methods and placeholder DOM
+2. **Missing critical systems**: Bike model, track geometry, audio, lap tracking, AI, minimap, mobile controls
+3. **Physics incomplete**: No suspension, no slope adaptation, no ground collision
+4. **No visual content**: No bike mesh, no track mesh, no sky, no vegetation integration
+5. **UI is dead ends**: All navigation buttons use `alert()` — no real game flow
+6. **No game state machine**: Loading → Title → Countdown → Race → Results chain never implemented
 
 ---
 
-## 1. DESIGN FUSION: BMW M × PlayStation × Spotify
+## Rewrite Vision
 
-### Visual Identity
-- **Canvas**: Pure black `#000000` — BMW M's near-black canvas
-- **Surface**: `#121212` → `#181818` → `#1f1f1f` — Spotify's dark immersion
-- **Accent**: PlayStation Blue `#0070d1` for primary CTAs, M Red `#e22718` for danger/warning states
-- **M Stripe**: 4px tricolor stripe (light blue → dark blue → red) as brand divider
-- **Typography**: Inter (free, Google Fonts) — weight 700 for display, weight 300 for body
-- **Buttons**: Pill geometry (PlayStation/Spotify fusion) — `9999px` radius
-- **No em dashes** — user requirement, use hyphens with spaces
+A **production-grade motocross game** that delivers the visceral thrill of Motocross Madness with modern 3D graphics. Every system must work end-to-end: bike physics feel real, terrain looks alive, AI pushes you, audio sells the experience, and the UI is buttery smooth.
 
-### In-Game Visual Style
-- **Terrain**: Procedural FBM noise heightmap (per the threejs-arcade-games skill) — dirt track with realistic bumps, ramps, jumps
-- **Bike**: Low-poly but detailed — wheel rotation animation, suspension compression, lean into turns
-- **Lighting**: Dynamic directional light + ambient + fogExp2 for depth
-- **Particles**: Object-pooled dust system (NO per-frame allocation) — canvas 2D overlay for performance
-- **Post-processing**: Screen shake on landing, speed-based FOV distortion
-- **Sky**: Procedural gradient sky dome with time-of-day cycle
-- **Vegetation**: InstancedMesh trees with 3-4 variants (trunk + canopy colors)
-- **Track markers**: Reflective posts, starting grid lines, checkpoint flags
+### Tech Stack
+- **Three.js r160** via importmap from CDN (proven on GitHub Pages)
+- **TypeScript** for type safety and IDE support
+- **Vite** for dev server + production build
+- **Vitest** with Playwright browser for integration tests
+- **Web Audio API** for procedural audio
+- **localStorage** for career persistence
+- **Single HTML** deployment to GitHub Pages
+
+### Design Principles
+1. **Red/Green TDD**: Write failing test → write code → make it pass → refactor
+2. **No stubs in production**: Every system must be complete, not placeholder
+3. **Object pooling everywhere**: Zero GC pressure during gameplay
+4. **Delta time capped**: 50ms max to prevent physics spiral
+5. **Pixel ratio capped**: 2x for mobile performance
+6. **Modular architecture**: Each system testable in isolation
 
 ---
 
-## 2. CORE ARCHITECTURE
+## Architecture: Entity-Component-System Lite
 
-### Single HTML File Structure
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>MOTOCROSS MADNESS 3D</title>
-  <style>/* All CSS inline */</style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-</head>
-<body>
-  <!-- Loading screen -->
-  <!-- Title screen -->
-  <!-- HUD overlay -->
-  <!-- Minimap canvas -->
-  <script>
-    // All game code inline — IIFE pattern
-    // 1. Constants & Config
-    // 2. Noise / Heightmap (Simplex-like FBM)
-    // 3. Terrain Generation
-    // 4. Bike Model & Physics
-    // 5. Track Definition
-    // 6. Camera System
-    // 7. Particle System (object pool)
-    // 8. Audio System (Web Audio API)
-    // 9. Input System
-    // 10. Game State Machine
-    // 11. UI / HUD Manager
-    // 12. Boot Sequence
-  </script>
-</body>
-</html>
+```
+dirt-bike-racing/
+  index.html                    # Deployed single-file game
+  package.json                  # Dev dependencies
+  vite.config.ts               # Vite configuration
+  vitest.config.ts             # Vitest configuration
+  tsconfig.json                # TypeScript configuration
+  .github/
+    workflows/
+      test-and-deploy.yml      # CI/CD pipeline
+  .htaccess                    # MIME types
+  tests/
+    core.test.ts               # Unit tests
+    setup.ts                   # Test setup
+  src/
+    main.ts                    # Boot sequence, entry point
+    core/
+      engine.ts                # Three.js renderer initialization
+      clock.ts                 # Delta time, frame timing, cap
+      input.ts                 # Keyboard + touch + gamepad
+      audio.ts                 # Web Audio API procedural audio
+      state.ts                 # State machine: LOADING→TITLE→RACE→RESULTS
+    physics/
+      bike.ts                  # Bike physics: throttle, brake, steer, suspension
+      suspension.ts            # Spring-damper model
+      ground.ts                # Ground collision, slope adaptation
+      aircontrol.ts            # Air control, trick scoring, wheelie detection
+      momentum.ts              # Momentum conservation, friction, traction
+    world/
+      terrain.ts               # FBM noise heightmap (5/3/2 octaves)
+      track.ts                 # Parametric track with checkpoints
+      vegetation.ts            # InstancedMesh trees with terrain integration
+      sky.ts                   # Procedural sky dome + atmospheric fog
+      particles.ts             # Object-pooled particle effects (canvas 2D overlay)
+    render/
+      camera.ts                # Chase cam with dynamic FOV
+      minimap.ts               # Canvas 2D minimap overlay
+      hud.ts                   # Speed, gear, lap, timer HUD
+      screens.ts               # Title, countdown, results screen rendering
+    bike/
+      model.ts                 # 3D bike model: chassis, wheels, suspension
+      animation.ts             # Wheel rotation, lean, suspension visual
+    ai/
+      opponent.ts              # Track-following AI with speed variation
+      laptracker.ts            # AI lap progress tracking
+    utils/
+      noise.ts                 # Simplex noise + FBM
+      math.ts                  # Lerp, clamp, angle helpers
+      pool.ts                  # Object pooling utilities
+      save.ts                  # localStorage career manager
+      dom.ts                   # DOM manipulation helpers
+    styles/
+      main.css                 # All game CSS (BMW M × PlayStation × Spotify)
+    types/
+      game.d.ts                # Game type definitions
+      physics.d.ts             # Physics type definitions
+      world.d.ts               # World type definitions
 ```
 
-### State Machine
-```
-LOADING → TITLE → COUNTDOWN → RACING → LAP_COMPLETE → RACE_COMPLETE
-                                      ↓
-                              GARAGE → TITLE
-                                      ↓
-                              MODE_SELECT → TITLE
-                                      ↓
-                              CAREER → TITLE
-```
+---
+
+## Development Phases: Red/Green TDD
+
+### Phase 1: Foundation (Tests First)
+**Goal**: Build the skeleton that all other phases depend on.
+
+1. **Clock system** — Delta time, frame timing, cap at 50ms
+   - Test: `ClockTest` — verifies delta time calculation, cap behavior
+   - Green: Returns correct delta time, caps at 50ms
+
+2. **State machine** — LOADING → TITLE → COUNTDOWN → RACE → RESULTS
+   - Test: `StateMachineTest` — verifies transitions, events
+   - Green: Transitions fire correct events, rejects invalid transitions
+
+3. **Input system** — Keyboard + touch + gamepad
+   - Test: `InputTest` — verifies key state, touch coordinates, gamepad axes
+   - Green: Returns correct state for all input types
+
+4. **Audio system** — Web Audio API procedural audio
+   - Test: `AudioTest` — verifies oscillator creation, gain control, frequency mapping
+   - Green: Creates oscillators, maps RPM to frequency, handles silence
+
+5. **Engine initialization** — Three.js renderer setup
+   - Test: `EngineTest` — verifies renderer creation, pixel ratio, shadow maps
+   - Green: Creates WebGL renderer with correct settings
+
+### Phase 2: World Generation
+**Goal**: Build the world the bike races on.
+
+6. **Noise generator** — Simplex noise with LUT + FBM
+   - Test: `NoiseTest` — verifies seed consistency, FBM output, terrain height
+   - Green: Same seed produces same noise, FBM produces varied terrain
+
+7. **Terrain heightmap** — 200x200 grid with FBM sampling
+   - Test: `TerrainTest` — verifies height sampling, normal calculation
+   - Green: getHeight returns correct values, getNormal returns unit vectors
+
+8. **Track generation** — Parametric sinusoidal loop carved into terrain
+   - Test: `TrackTest` — verifies track path, checkpoints, ramp placement
+   - Green: Track follows parametric curve, checkpoints placed correctly
+
+9. **Vegetation** — InstancedMesh trees placed on terrain
+   - Test: `VegetationTest` — verifies tree placement, terrain height matching
+   - Green: Trees placed on terrain surface, 500+ trees in 2 draw calls
+
+10. **Sky + atmosphere** — Procedural sky dome + exponential fog
+    - Test: `SkyTest` — verifies sky dome creation, fog parameters
+    - Green: Sky dome renders correctly, fog creates depth
+
+### Phase 3: Physics Engine
+**Goal**: Make the bike feel real.
+
+11. **Bike physics** — Throttle, brake, steer with terrain adaptation
+    - Test: `BikePhysicsTest` — verifies acceleration, braking, steering
+    - Green: Bike responds to input, speed clamps correctly
+
+12. **Suspension system** — Spring-damper model
+    - Test: `SuspensionTest` — verifies compression, rebound, damping
+    - Green: Suspension compresses on impact, rebounds smoothly
+
+13. **Ground collision** — Terrain height sampling every frame
+    - Test: `GroundTest` — verifies height sampling, slope detection
+    - Green: Bike stays on terrain, slope affects physics
+
+14. **Air control** — Reduced steering while airborne, trick scoring
+    - Test: `AirControlTest` — verifies airborne behavior, trick detection
+    - Green: Air control works, tricks scored correctly
+
+15. **Momentum** — Friction, traction, gravity, wheelie detection
+    - Test: `MomentumTest` — verifies friction, traction, wheelie scoring
+    - Green: Momentum conserved, wheelies detected and scored
+
+### Phase 4: Game Systems
+**Goal**: Make it a complete racing game.
+
+16. **Lap tracking** — Angle-based checkpoints, anti-cheat
+    - Test: `LapTest` — verifies checkpoint crossing, lap counting
+    - Green: Lap counted only when all checkpoints crossed in order
+
+17. **AI opponents** — Track-following with speed variation
+    - Test: `AITest` — verifies AI follows track, speed variation
+    - Green: AI follows parametric track, speed varies by skill level
+
+18. **Particle system** — Object-pooled dust, impacts, boost
+    - Test: `ParticleTest` — verifies pooling, emission, lifetime
+    - Green: Pool recycles particles, effects render correctly
+
+19. **Camera system** — Chase cam with dynamic FOV
+    - Test: `CameraTest` — verifies chase cam, FOV scaling, lerp
+    - Green: Camera follows bike smoothly, FOV widens at speed
+
+20. **Minimap** — Canvas 2D overlay with bike + AI positions
+    - Test: `MinimapTest` — verifies rendering, position mapping
+    - Green: Minimap shows bike and AI positions correctly
+
+### Phase 5: UI/UX
+**Goal**: Make it look and feel premium.
+
+21. **HUD** — Speed, gear, lap, timer, minimap overlay
+    - Test: `HUDTest` — verifies HUD updates, position display
+    - Green: HUD updates every frame with correct data
+
+22. **Screens** — Loading, title, countdown, results
+    - Test: `ScreenTest` — verifies screen transitions, animations
+    - Green: Screens transition smoothly, countdown works
+
+23. **Bike selection** — Garage with 3 bikes, stat bars
+    - Test: `GarageTest` — verifies bike selection, stat display
+    - Green: 3 bikes selectable, stats displayed correctly
+
+24. **Career mode** — Wins, best laps, localStorage persistence
+    - Test: `CareerTest` — verifies save/load, version handling
+    - Green: Career data persists across sessions, version migration works
+
+25. **Mobile controls** — Touch joystick + gas/brake buttons
+    - Test: `MobileTest` — verifies touch input, button layout
+    - Green: Touch joystick works, buttons respond to touch
+
+### Phase 6: Polish & Integration
+**Goal**: Make it AMAZING.
+
+26. **Bike 3D model** — Chassis, wheels, suspension geometry
+    - Test: `BikeModelTest` — verifies model creation, materials
+    - Green: Bike model renders with correct geometry and materials
+
+27. **Bike animation** — Wheel rotation, lean, suspension visual
+    - Test: `BikeAnimationTest` — verifies wheel spin, lean angles
+    - Green: Wheels rotate with speed, bike leans into turns
+
+28. **Track visuals** — Track geometry, curbs, markers, starting grid
+    - Test: `TrackVisualTest` — verifies track mesh, markers
+    - Green: Track rendered with curbs, markers, starting grid
+
+29. **Audio polish** — Engine sounds, landing thuds, countdown beeps
+    - Test: `AudioPolishTest` — verifies engine mapping, impact sounds
+    - Green: Engine sounds map to RPM, landing thuds play on impact
+
+30. **Visual polish** — PBR materials, bloom, tone mapping
+    - Test: `VisualPolishTest` — verifies materials, post-processing
+    - Green: PBR materials render correctly, bloom visible
+
+### Phase 7: Testing & Deployment
+**Goal**: Ship it.
+
+31. **Integration tests** — Full game flow in browser
+    - Test: `IntegrationTest` — verifies complete game flow
+    - Green: Full game plays end-to-end in browser
+
+32. **Performance profiling** — FPS, memory, bundle size
+    - Test: `PerfTest` — verifies 60fps, <200MB RSS, <150KB gzipped
+    - Green: Meets all performance targets
+
+33. **Build + deploy** — Single HTML to GitHub Pages
+    - Test: `DeployTest` — verifies build output, deployment
+    - Green: Builds to single HTML, deploys to GitHub Pages
 
 ---
 
-## 3. GAMEPLAY FEATURES (Prioritized)
+## Test Strategy: Red/Green TDD
 
-### M1: Core Racing (MVP)
-- **Procedural track**: Sinusoidal loop with ramps, jumps, chicanes
-- **Bike physics**: Arcade-style — throttle, brake, steer, wheelie, air control
-- **Terrain collision**: Raycast heightmap lookup, slope-adaptive pitch/roll
-- **Lap system**: 3 checkpoints, proper angle-based detection
-- **Finish condition**: Fixed lap count → race complete screen
-- **Timer**: Accurate elapsed time tracking
-- **Speed display**: Derived from velocity magnitude
+### Unit Tests (Vitest + jsdom)
+- Test each system in isolation
+- Mock Three.js where possible
+- Verify logic correctness, not rendering
 
-### M2: Visual Polish
-- **Wheel rotation**: Torus geometry rotates based on speed
-- **Suspension animation**: Bike body compresses on landing
-- **Dust particles**: Object-pooled canvas 2D overlay (NOT Three.js meshes)
-- **Screen shake**: On landing impact
-- **Dynamic FOV**: Camera FOV widens with speed
-- **Sky gradient**: Changes based on in-game time
-- **Fog**: Atmospheric depth with fogExp2
-- **Shadow maps**: 1024² for performance
+### Browser Tests (Vitest + Playwright)
+- Test full game flow in real browser
+- Verify rendering, interaction, audio
+- Capture screenshots for visual verification
 
-### M3: Audio
-- **Engine sound**: Web Audio API — sawtooth oscillator mapped to RPM
-- **Tire noise**: Filtered noise buffer when sliding
-- **Landing thud**: Short noise burst on impact
-- **Countdown beeps**: Simple oscillator tones
-- **UI clicks**: Short blips for menu navigation
-
-### M4: Game Modes
-- **National**: Standard 3-lap race
-- **Stunt**: Score-based — big air tricks, wheelies
-- **Enduro**: Time attack — beat the clock
-- **Supercross**: Tighter track, more jumps
-- **Baja**: Long track, varied terrain
-
-### M5: Career System
-- **Persistent stats**: localStorage with version field
-- **Bike garage**: 3 bikes with different stats (speed, handling, suspension)
-- **Leaderboard**: Best lap times per mode
-- **Achievements**: "First Win", "Big Air", "Perfect Lap"
+### Integration Tests
+- Full game: loading → title → countdown → race → results
+- Verify all systems work together
+- Performance benchmarks
 
 ---
 
-## 4. TECHNICAL DEBT FIXES (From Audit)
+## Quality Gates
 
-### Critical
-1. **Particle system**: Replace per-frame allocation with object pool
-   - Pre-allocate 200 canvas 2D particles
-   - Reuse positions, colors, lifetimes
-   - Zero GC pressure during gameplay
+Every phase must pass these gates before moving to the next:
 
-2. **Lap tracking**: Fix operator precedence bug
-   - Proper checkpoint angle detection with parentheses
-   - 3 checkpoints: start/finish, halfway, 3/4
-
-3. **Race finish**: Implement proper end condition
-   - Lap counter → finishRace() → race complete screen
-
-4. **UI.clock**: Fix dangling reference
-   - Reference Game.clock directly, not UI.clock
-
-### High Priority
-5. **Terrain**: Replace sin/cos with real FBM noise
-   - Simplex-like permutation LUT (512 entries)
-   - 5 octaves for rolling hills, 3 for bumps, 2 for detail
-   - Track path carved into terrain
-
-6. **Track**: Replace torus with proper track path
-   - Sine-wave loop track
-   - Terrain matches track geometry
-   - Track width with raised curbs
-
-7. **Bike model**: Add wheel rotation + suspension
-   - Wheels rotate based on speed
-   - Body leans into turns
-   - Suspension compression on landing
-
-8. **Game modes**: Implement mode-specific logic
-   - Different track parameters per mode
-   - Different scoring per mode
-
-### Medium Priority
-9. **Minimap**: Actually draw the minimap
-   - Canvas 2D overlay showing bike position on track
-   - Rotating view, scale to track bounds
-
-10. **Position tracking**: Add AI opponents
-    - Simple circle-following bots
-    - Position pills update based on lap progress
-
-11. **Touch controls**: Virtual joystick for mobile
-    - On-screen steering pad
-    - Throttle/brake buttons
-
-12. **Error handling**: CDN fallback
-    - If Three.js fails to load, show error message
+1. **All unit tests pass** — No red tests
+2. **TypeScript compiles** — No type errors
+3. **Build succeeds** — Vite produces output
+4. **Browser test passes** — Full game flow works
+5. **Performance verified** — 60fps, <200MB RSS, <150KB gzipped
+6. **Visual verification** — Screenshot confirms rendering
 
 ---
 
-## 5. PERFORMANCE OPTIMIZATIONS
-
-### Rendering
-- **InstancedMesh** for vegetation (2 draw calls for 500+ trees)
-- **flatShading: true** on all materials
-- **Pixel ratio capping**: Math.min(devicePixelRatio, 2)
-- **Shadow map**: 1024² (not 2048²) for performance
-- **Particle system**: Canvas 2D overlay (NOT Three.js meshes)
-  - Zero Three.js allocations during gameplay
-  - Pre-allocate 200 particles
-  - Reuse geometry/materials
-
-### Physics
-- **Heightmap cache**: O(1) bilinear interpolation
-- **Fixed dt**: 1/60 constant, not variable
-- **Capped delta time**: Math.min(dt, 0.05)
-- **Speed clamp**: Global cap after position integration
-
-### Memory
-- **Object pooling**: Particles, UI elements, temporary objects
-- **No per-frame allocations** during gameplay loop
-- **Dispose old geometries**: When changing bikes/modes
-
----
-
-## 6. TDD WORKFLOW
-
-### Test Categories
-1. **Unit tests**: Physics calculations, noise functions, lap detection
-2. **Integration tests**: Game loop state transitions
-3. **Visual tests**: Screenshot comparison (manual, via vision analysis)
-4. **Performance tests**: FPS monitoring, GC pressure
-
-### Testing Framework
-- **Vitest** for unit tests (fast, browser-compatible)
-- **Custom game loop harness**: Headless Three.js for physics testing
-- **Screenshot comparison**: Puppeteer for visual regression
-
-### CI/CD
-- **GitHub Actions**: Run tests on every push
-- **Browser test**: Headless Chrome for visual testing
-- **Performance benchmark**: FPS logging over 60-second run
-
----
-
-## 7. DEPLOYMENT
-
-### GitHub Pages
-- **Branch**: main (direct push)
-- **URL**: https://dominick253.github.io/dirt-bike-racing/
-- **No build step**: Single HTML file, CDN Three.js r128
-- **.htaccess**: Already configured for MIME types
-
-### Verification
-1. **Vision analysis**: Screenshot the deployed game
-2. **Console check**: No JS errors in browser console
-3. **Performance**: 60 FPS on mid-range laptop
-4. **Controls**: Keyboard + touch input verified
-5. **Career persistence**: localStorage read/write verified
-
----
-
-## 8. DEVELOPMENT MILESTONES
-
-### Phase 1: Foundation (Days 1-3)
-- [ ] Noise/heightmap system (FBM)
-- [ ] Terrain generation with track carving
-- [ ] Basic bike physics (throttle, brake, steer)
-- [ ] Ground collision + slope adaptation
-- [ ] Camera chase system
-
-### Phase 2: Visual Polish (Days 4-6)
-- [ ] Bike model with wheel rotation
-- [ ] Particle dust system (object pool)
-- [ ] Lighting + fog + shadows
-- [ ] Sky gradient
-- [ ] Vegetation (instanced trees)
-
-### Phase 3: Game Systems (Days 7-9)
-- [ ] Lap tracking (proper checkpoint system)
-- [ ] Race finish condition
-- [ ] Timer + speed display
-- [ ] Audio system (Web Audio API)
-- [ ] Countdown sequence
-
-### Phase 4: UI/UX (Days 10-12)
-- [ ] Title screen (BMW M × PlayStation fusion)
-- [ ] Mode selection
-- [ ] Garage (3 bikes)
-- [ ] Career stats
-- [ ] HUD (speed, gear, lap, timer, minimap)
-
-### Phase 5: Game Modes (Days 13-15)
-- [ ] National (3-lap race)
-- [ ] Stunt (big air scoring)
-- [ ] Enduro (time attack)
-- [ ] Supercross (tight track)
-- [ ] Baja (long track)
-
-### Phase 6: Polish & Deploy (Days 16-18)
-- [ ] Touch controls
-- [ ] AI opponents (basic)
-- [ ] Achievement system
-- [ ] Performance optimization
-- [ ] GitHub Pages deployment
-- [ ] Vision analysis verification
-- [ ] Console error check
-
----
-
-## 9. RISK MITIGATION
+## Risk Mitigation
 
 | Risk | Mitigation |
 |------|-----------|
-| Three.js CDN fails on GitHub Pages | Use plain `<script src>` tag (r128) |
-| Missing renderer.render() | Checklist item in boot sequence |
+| Three.js CDN fails | Importmap from cdnjs.cloudflare.com (proven) |
+| Missing renderer.render() | Checklist in boot sequence |
 | GC pressure from particles | Object pool + canvas 2D overlay |
-| Lap tracking bugs | Proper parentheses, unit tests |
-| Timer shows 0:00.0 | Reference Game.clock directly |
-| Bike selection has no effect | Bike model + physics stats per bike |
-| No finish condition | Lap counter → finishRace() |
-| Mobile not supported | Virtual joystick from Day 10 |
+| Lap tracking bugs | Angle-based checkpoint validation |
+| Physics ground collision | Terrain height sampling every frame |
+| AI doesn't follow track | Parametric track path for all entities |
+| Mobile not supported | Touch joystick + buttons |
+| WebGL not in headless | Browser tool cannot render 3D — use Playwright |
+| localStorage corruption | Version field in career key |
+| Bundle size too large | Tree shaking, code splitting, minification |
+| Bike model missing | Phase 6: Build 3D bike model from primitives |
+| Track not rendered | Phase 6: Build track geometry with curbs |
+| No audio | Phase 6: Implement Web Audio API |
+| State machine broken | Phase 1: Build proper state machine |
 
 ---
 
-## 10. DESIGN TOKENS (Fusion: BMW M × PlayStation × Spotify)
+## Deployment
 
-### Colors
-```css
-:root {
-  --color-canvas: #000000;
-  --color-surface-1: #121212;
-  --color-surface-2: #181818;
-  --color-surface-3: #1f1f1f;
-  --color-accent: #0070d1;        /* PlayStation Blue */
-  --color-accent-hover: #0064b7;
-  --color-danger: #e22718;        /* M Red */
-  --color-danger-hover: #ff3b2e;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #b3b3b3;
-  --color-text-muted: #7e7e7e;
-  --color-border: #3c3c3c;
-  --color-border-strong: #262626;
-  --color-success: #0fa336;
-  --color-warning: #f4b400;
-  --color-m-stripe-1: #0066b1;
-  --color-m-stripe-2: #1c69d4;
-  --color-m-stripe-3: #e22718;
-}
-```
-
-### Typography
-- **Display**: Inter 700, uppercase, 0 letter-spacing
-- **Body**: Inter 300, sentence case
-- **Buttons**: Inter 700, uppercase, 1.5px letter-spacing
-- **Micro labels**: Inter 700, uppercase, 1.5px letter-spacing
-
-### Geometry
-- **Buttons**: Pill (9999px radius)
-- **Cards**: 8px radius
-- **Inputs**: 500px radius (pill)
-- **Icons**: 50% radius (circular)
+- **Branch**: `main` (direct push)
+- **URL**: https://dominick253.github.io/dirt-bike-racing/
+- **Build**: Vite bundles to single HTML
+- **CI/CD**: GitHub Actions test + deploy
 
 ---
 
-*Plan generated 2026-07-16. Target: 18-day development sprint → GitHub Pages deployment → Vision analysis verification.*
+*Plan v4.0 — 2026-07-17. Red/Green TDD with comprehensive test strategy. Every system must work end-to-end.*

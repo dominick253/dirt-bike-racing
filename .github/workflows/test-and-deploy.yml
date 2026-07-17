@@ -17,11 +17,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Vitest
-        run: npm init -y && npm install vitest @vitest/browser --save-dev
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
 
       - name: Run tests
-        run: npx vitest run --browser chromium
+        run: npm test
         timeout-minutes: 5
 
   deploy:
@@ -31,8 +34,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v7
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./dist
