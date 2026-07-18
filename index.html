@@ -1606,26 +1606,36 @@ canvas {
 
   function showGarage() {
     const list = $('bike-list');
-    list.innerHTML = '';
+    list.textContent = '';
     BIKES.forEach((bike, i) => {
       const card = document.createElement('div');
       card.className = 'bike-card' + (i === selectedBike ? ' selected' : '');
       card.dataset.bike = i;
-      card.innerHTML = `
-        <h3>${bike.name}</h3>
-        <div class="bike-stats">
-          <span class="bike-stat">SPD <span class="bike-stat-val">${(bike.speed * 100).toFixed(0)}%</span></span>
-          <span class="bike-stat">HND <span class="bike-stat-val">${(bike.handling * 100).toFixed(0)}%</span></span>
-          <span class="bike-stat">SUS <span class="bike-stat-val">${(bike.suspension * 100).toFixed(0)}%</span></span>
-        </div>
-      `;
+      const h3 = document.createElement('h3');
+      h3.textContent = bike.name;
+      card.appendChild(h3);
+      const stats = document.createElement('div');
+      stats.className = 'bike-stats';
+      const spd = document.createElement('span');
+      spd.className = 'bike-stat';
+      spd.textContent = 'SPD ' + (bike.speed * 100).toFixed(0) + '%';
+      stats.appendChild(spd);
+      const hnd = document.createElement('span');
+      hnd.className = 'bike-stat';
+      hnd.textContent = 'HND ' + (bike.handling * 100).toFixed(0) + '%';
+      stats.appendChild(hnd);
+      const sus = document.createElement('span');
+      sus.className = 'bike-stat';
+      sus.textContent = 'SUS ' + (bike.suspension * 100).toFixed(0) + '%';
+      stats.appendChild(sus);
+      card.appendChild(stats);
       list.appendChild(card);
     });
   }
 
   function showCareer() {
     const stats = $('career-stats');
-    stats.innerHTML = '';
+    stats.textContent = '';
     const rows = [
       ['Total Races', career.races],
       ['Wins', career.wins],
@@ -1638,7 +1648,14 @@ canvas {
     rows.forEach(([label, value]) => {
       const row = document.createElement('div');
       row.className = 'career-stat-row';
-      row.innerHTML = `<span class="career-stat-label">${label}</span><span class="career-stat-value">${value}</span>`;
+      const lbl = document.createElement('span');
+      lbl.className = 'career-stat-label';
+      lbl.textContent = label;
+      const val = document.createElement('span');
+      val.className = 'career-stat-value';
+      val.textContent = value;
+      row.appendChild(lbl);
+      row.appendChild(val);
       stats.appendChild(row);
     });
   }
@@ -1906,8 +1923,6 @@ canvas {
       bike.vel.z -= Math.sin(angle) * pushForce * dt;
       bike.speed *= 0.95;
     }
-
-    bike.speed = Math.sqrt(bike.vel.x * bike.vel.x + bike.vel.z * bike.vel.z) * (bike.vel.x * sinYaw + bike.vel.z * cosYaw > 0 ? 1 : -1);
 
     // Dust particles
     if (bike.onGround && Math.abs(bike.speed) > 5 && Math.random() < 0.3) {
