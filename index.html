@@ -1858,8 +1858,15 @@ canvas {
 
       if (compress) {
         bike.suspension = Math.max(0.5, bike.suspension - CFG.COMPRESS_FORCE * dt);
+      }
+
+      // Spring-damper: compress with speed bumps, rebound to 1.0
+      const groundHeight = terrainHeightAt(bike.pos.x, bike.pos.z);
+      const speedCompression = Math.max(0, (Math.abs(bike.speed) - 15) * 0.008);
+      if (bikeBottomY < groundHeight + 0.1) {
+        bike.suspension = Math.max(0.45, bike.suspension - speedCompression * dt * 3);
       } else {
-        bike.suspension = Math.min(1.0, bike.suspension + CFG.COMPRESS_FORCE * dt * 0.5);
+        bike.suspension = Math.min(1.0, bike.suspension + CFG.COMPRESS_FORCE * dt);
       }
 
       bike.speed *= CFG.GROUND_FRICTION;
@@ -1880,12 +1887,14 @@ canvas {
 
       if (wasAir) {
         const impact = Math.abs(bike.vel.y);
+        // Spring-damper compression on landing
+        const compression = Math.min(impact * 0.12, 0.55);
+        bike.suspension = Math.max(0.4, 1.0 - compression);
         if (impact > 4) {
-          // Screen shake handled in render
+          shakeMag = Math.min(impact * 0.15, 1.2);
           playSound('landing');
         }
         bike.vel.y = 0;
-        bike.suspension = 1.0;
       }
     } else {
       bike.onGround = false;
@@ -2013,6 +2022,13 @@ canvas {
     bikeGroup.rotation.y = bike.yaw;
     bikeGroup.rotation.x = bike.pitch;
     bikeGroup.rotation.z = bike.roll;
+
+    // Suspension visual compression
+    if (bodyMesh) {
+      const suspScale = 0.85 + bike.suspension * 0.15;
+      bodyMesh.scale.y = suspScale;
+      bodyMesh.position.y = 1.8 + (bike.suspension - 1.0) * 0.4;
+    }
 
     // Wheel rotation
     const wheelRot = bike.speed * 0.1;
