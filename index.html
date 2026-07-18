@@ -1893,6 +1893,8 @@ canvas {
         if (impact > 4) {
           shakeMag = Math.min(impact * 0.15, 1.2);
           playSound('landing');
+          // Landing impact dust cloud
+          spawnDust(bike.pos.x - 1.4, terrainHeightAt(bike.pos.x, bike.pos.z), bike.pos.z, Math.min(Math.floor(impact * 2), 12));
         }
         bike.vel.y = 0;
       }
