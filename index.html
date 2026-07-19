@@ -1273,7 +1273,14 @@
             new THREE.Vector3(R * 0.92, 0, -R * 0.18),
           ];
           for (const p of waypoints) p.y = getTerrainHeight(p.x, p.z) - 0.5;
-          console.log("TRACK: waypoints with heights:", waypoints.map(p => ({x: p.x.toFixed(0), y: p.y.toFixed(0), z: p.z.toFixed(0)})));
+          console.log(
+            "TRACK: waypoints with heights:",
+            waypoints.map((p) => ({
+              x: p.x.toFixed(0),
+              y: p.y.toFixed(0),
+              z: p.z.toFixed(0),
+            })),
+          );
           trackCurve = new THREE.CatmullRomCurve3(waypoints, true);
           const testP = trackCurve.getPoint(0);
           console.log("TRACK: curve OK, getPoint(0)=", testP);
@@ -2214,6 +2221,7 @@
           }
 
           // Ground physics
+          const bikeBottomY = bike.pos.y - CFG.WHEEL_RADIUS * bike.suspension;
           if (bike.onGround) {
             if (throttle > 0) {
               bike.speed += CFG.ACCEL * dt * speedMult;
@@ -2269,7 +2277,6 @@
           bike.vel.y += CFG.GRAVITY * dt;
 
           // Ground collision
-          const bikeBottomY = bike.pos.y - CFG.WHEEL_RADIUS * bike.suspension;
           const th = terrainHeightAt(bike.pos.x, bike.pos.z);
           const belowGround = bikeBottomY < th;
 
