@@ -19,7 +19,7 @@
 
 ## Architecture
 
-Everything in `index.html` — single file, ~2100 lines:
+Everything in `index.html` — single file, ~2600 lines:
 
 ```
 index.html/
@@ -28,12 +28,13 @@ index.html/
   JS:
     boot() → init renderer, scene, camera, lights
     createTerrain() → FBM heightmap, vertex colors
-    createTrack() → CatmullRom tube geometry
+    createTrack() → winding 8-waypoint CatmullRom track with terrain-following tube geometry
+    createTrackCones() → instanced cones along track edges
     createBike() → Box/cylinder primitives (~500 tris)
     createVegetation() → InstancedMesh trees
     gameLoop() → requestAnimationFrame loop
     updatePhysics(dt) → throttle/brake/steer, suspension, ground collision, slope adaptation
-    updateAI(dt) → track-following AI opponents
+    updateAI(dt) → curve-following AI opponents using trackCurve path
     updateCamera() → chase cam with dynamic FOV
     syncBikeMesh() → position/orient bike model from physics state
     updateAndRenderParticles(dt) → dust particle pool (canvas 2D)
@@ -45,7 +46,8 @@ index.html/
 ## Features Implemented
 
 - ✅ FBM noise terrain with vertex colors (dirt track, grass, rock)
-- ✅ Parametric track (CatmullRom tube)
+- ✅ Winding 8-waypoint track (CatmullRom tube with terrain-following elevation)
+- ✅ Track cones (120 instanced cones along track edges)
 - ✅ Bike model from primitives (chassis, wheels, forks, exhaust, fenders)
 - ✅ Raycast ground collision via terrain heightmap cache
 - ✅ Physics: throttle, brake, steer, friction, gravity, air friction, slope adaptation
@@ -55,7 +57,7 @@ index.html/
 - ✅ 3 bikes with stat differences (speed/handling/suspension)
 - ✅ Lap tracking with 4 checkpoint quadrants
 - ✅ HUD: speed, gear, lap counter, timer, minimap, position
-- ✅ AI opponents (2-3 bikes)
+- ✅ AI opponents (3 bikes, curve-following with terrain-hugging)
 - ✅ Particle system (dust) with object pooling
 - ✅ Web Audio API engine sound
 - ✅ State machine: loading → title → countdown → racing → race_complete
@@ -63,13 +65,13 @@ index.html/
 - ✅ Mobile touch controls (joystick + buttons)
 - ✅ Screen shake on landing
 - ✅ Instanced vegetation (800+ trees)
+- ✅ Bike suspension visual compression (body mesh scales with suspension state)
+- ✅ Terrain heightmap cache (257×257 Float32Array with bilinear interpolation)
 
 ## Known Issues
 
-- Speed recalculated after position integration (physics bug — creates drift)
 - Track is a tube mesh overlaid on terrain, not carved into it
-- No post-processing (bloom, tone mapping)
-- Suspension visual doesn't compress (geometry stays static)
+- No post-processing bloom (ACESFilmic tone mapping active at 1.3 exposure)
 
 ## Files
 
