@@ -1262,39 +1262,18 @@
           if (trackMesh) scene.remove(trackMesh);
           const tw = MODES[currentMode].trackWidth;
           const R = CFG.TRACK_RADIUS;
-          const waypoints = [
-            new THREE.Vector3(R, 0, 0),
-            new THREE.Vector3(R * 0.65, 0, R * 0.78),
-            new THREE.Vector3(-R * 0.25, 0, R * 0.92),
-            new THREE.Vector3(-R * 0.88, 0, R * 0.45),
-            new THREE.Vector3(-R, 0, -R * 0.35),
-            new THREE.Vector3(-R * 0.35, 0, -R),
-            new THREE.Vector3(R * 0.55, 0, -R * 0.7),
-            new THREE.Vector3(R * 0.92, 0, -R * 0.18),
-          ];
-          for (const p of waypoints) p.y = getTerrainHeight(p.x, p.z) - 0.5;
-          console.log(
-            "TRACK: waypoints with heights:",
-            waypoints.map((p) => ({
-              x: p.x.toFixed(0),
-              y: p.y.toFixed(0),
-              z: p.z.toFixed(0),
-            })),
-          );
-          trackCurve = new THREE.CatmullRomCurve3(waypoints, true);
-          const testP = trackCurve.getPoint(0);
-          console.log("TRACK: curve OK, getPoint(0)=", testP);
-          const tubePoints = [];
-          for (let i = 0; i <= 200; i++) {
-            tubePoints.push(trackCurve.getPoint(i / 200).clone());
+          const points = [];
+          const segments = 200;
+          for (let i = 0; i <= segments; i++) {
+            const t = (i / segments) * Math.PI * 2;
+            const x = Math.cos(t) * R;
+            const z = Math.sin(t) * R;
+            const y = getTerrainHeight(x, z) - 0.5;
+            points.push(new THREE.Vector3(x, y, z));
           }
-          const tubeGeo = new THREE.TubeGeometry(
-            new THREE.CatmullRomCurve3(tubePoints, true),
-            200,
-            tw / 2,
-            16,
-            true,
-          );
+          trackCurve = new THREE.CatmullRomCurve3(points, true);
+          console.log("TRACK: curve OK, getPoint(0)=", trackCurve.getPoint(0));
+          const tubeGeo = new THREE.TubeGeometry(trackCurve, 200, tw / 2, 16, true);
           trackMesh = new THREE.Mesh(
             tubeGeo,
             new THREE.MeshStandardMaterial({
