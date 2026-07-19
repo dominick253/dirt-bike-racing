@@ -908,6 +908,8 @@ canvas {
   let particlePool = [];
   let treesInst = null;
   let trackMesh = null;
+  let trackCurve = null;
+  let trackCones = null;
   let skyDome = null;
   let dirLight, ambLight;
   let fogDensity = 0.003;
@@ -1112,16 +1114,24 @@ canvas {
   function createTrack() {
     if (trackMesh) scene.remove(trackMesh);
     const tw = MODES[currentMode].trackWidth;
-    const points = [];
-    const segments = 200;
-    for (let i = 0; i <= segments; i++) {
-      const t = (i / segments) * Math.PI * 2;
-      const x = Math.cos(t) * CFG.TRACK_RADIUS;
-      const z = Math.sin(t) * CFG.TRACK_RADIUS;
-      points.push(new THREE.Vector3(x, 0, z));
+    const R = CFG.TRACK_RADIUS;
+    const waypoints = [
+      new THREE.Vector3(R, 0, 0),
+      new THREE.Vector3(R * 0.65, 0, R * 0.78),
+      new THREE.Vector3(-R * 0.25, 0, R * 0.92),
+      new THREE.Vector3(-R * 0.88, 0, R * 0.45),
+      new THREE.Vector3(-R, 0, -R * 0.35),
+      new THREE.Vector3(-R * 0.35, 0, -R),
+      new THREE.Vector3(R * 0.55, 0, -R * 0.7),
+      new THREE.Vector3(R * 0.92, 0, -R * 0.18),
+    ];
+    for (const p of waypoints) p.y = getTerrainHeight(p.x, p.z) - 0.5;
+    trackCurve = new THREE.CatmullRomCurve3(waypoints, true);
+    const tubePoints = [];
+    for (let i = 0; i <= 200; i++) {
+      tubePoints.push(trackCurve.getPoint(i / 200).clone());
     }
-    const curve = new THREE.CatmullRomCurve3(points, true);
-    const tubeGeo = new THREE.TubeGeometry(curve, 200, tw / 2, 16, true);
+    const tubeGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(tubePoints, true), 200, tw / 2, 16, true);
     trackMesh = new THREE.Mesh(tubeGeo, new THREE.MeshStandardMaterial({
       color: 0x8B7355,
       flatShading: true,
@@ -1129,6 +1139,34 @@ canvas {
     }));
     trackMesh.receiveShadow = true;
     scene.add(trackMesh);
+  }
+
+  // === TRACK CONES ===
+  function createTrackCones() {
+    if (trackCones) scene.remove(trackCones);
+    const coneGeo = new THREE.ConeGeometry(0.25, 0.9, 6);
+    coneGeo.translate(0, 0.45, 0);
+    const coneMat = new THREE.MeshStandardMaterial({ color: 0xff6600, flatShading: true });
+    const count = 60;
+    trackCones = new THREE.InstancedMesh(coneGeo, coneMat, count * 2);
+    const dm = new THREE.Object3D();
+    const tw = MODES[currentMode].trackWidth / 2 + 0.8;
+    for (let i = 0; i < count; i++) {
+      const t = i / count;
+      const p = trackCurve.getPoint(t);
+      const lookAhead = trackCurve.getPoint((t + 0.005) % 1);
+      const right = new THREE.Vector3(lookAhead.z - p.z, 0, -(lookAhead.x - p.x)).normalize();
+      dm.position.set(p.x + right.x * tw, terrainHeightAt(p.x + right.x * tw, p.z + right.z * tw) + 0.05, p.z + right.z * tw);
+      dm.lookAt(p.x, p.y + 1, p.z);
+      dm.updateMatrix();
+      trackCones.setMatrixAt(i, dm.matrix);
+      dm.position.set(p.x - right.x * tw, terrainHeightAt(p.x - right.x * tw, p.z - right.z * tw) + 0.05, p.z - right.z * tw);
+      dm.lookAt(p.x, p.y + 1, p.z);
+      dm.updateMatrix();
+      trackCones.setMatrixAt(count + i, dm.matrix);
+    }
+    trackCones.instanceMatrix.needsUpdate = true;
+    scene.add(trackCones);
   }
 
   // === SKY DOME ===
@@ -1752,13 +1790,14 @@ canvas {
     bigAirScore = 0;
     wheelieTime = 0;
 
-    // Spawn bike on track
-    const spawnX = CFG.TRACK_RADIUS;
-    const spawnZ = 0;
-    const spawnY = getTerrainHeight(spawnX, spawnZ) + CFG.WHEEL_RADIUS + 1;
-    bike.pos.set(spawnX, spawnY, spawnZ);
+    // Spawn bike on track start
+    const spawn = trackCurve.getPoint(0);
+    bike.pos.set(spawn.x, spawn.y + CFG.WHEEL_RADIUS + 1, spawn.z);
     bike.vel.set(0, 0, 0);
-    bike.yaw = Math.PI;
+    bike.yaw = Math.atan2(
+      trackCurve.getPoint(0.01).x - spawn.x,
+      trackCurve.getPoint(0.01).z - spawn.z,
+    );
     bike.pitch = 0;
     bike.roll = 0;
     bike.onGround = false;
@@ -1775,16 +1814,17 @@ canvas {
     aiBikes = [];
     const count = 3;
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + 0.5;
-      const x = Math.cos(angle) * CFG.TRACK_RADIUS;
-      const z = Math.sin(angle) * CFG.TRACK_RADIUS;
+      const t = 0.85 + (i / count) * 0.1;
+      const spawn = trackCurve.getPoint(t);
+      const lookAhead = trackCurve.getPoint((t + 0.01) % 1);
       aiBikes.push({
-        pos: new THREE.Vector3(x, getTerrainHeight(x, z) + 2, z),
+        pos: new THREE.Vector3(spawn.x, spawn.y + 1.2, spawn.z),
         vel: new THREE.Vector3(0, 0, 0),
-        yaw: angle + Math.PI,
+        yaw: Math.atan2(lookAhead.x - spawn.x, lookAhead.z - spawn.z),
         speed: 20 + Math.random() * 10,
+        speedMult: 0.85 + Math.random() * 0.3,
         lapProgress: 0,
-        angle: angle,
+        t: t,
       });
     }
   }
@@ -1973,16 +2013,17 @@ canvas {
   // === AI UPDATE ===
   function updateAI(dt) {
     for (const ai of aiBikes) {
-      ai.angle += dt * 0.3;
-      const targetX = Math.cos(ai.angle) * CFG.TRACK_RADIUS;
-      const targetZ = Math.sin(ai.angle) * CFG.TRACK_RADIUS;
-      const dx = targetX - ai.pos.x;
-      const dz = targetZ - ai.pos.z;
-      ai.yaw = Math.atan2(dx, dz);
-      ai.pos.x += Math.sin(ai.yaw) * ai.speed * dt;
-      ai.pos.z += Math.cos(ai.yaw) * ai.speed * dt;
-      ai.pos.y = getTerrainHeight(ai.pos.x, ai.pos.z) + 3;
-      ai.lapProgress = (ai.angle / (Math.PI * 2)) % 1;
+      ai.t += dt * 0.08 * ai.speedMult;
+      if (ai.t > 1) { ai.t -= 1; ai.laps++; }
+      const target = trackCurve.getPoint(ai.t);
+      const lookAhead = trackCurve.getPoint((ai.t + 0.02) % 1);
+      ai.yaw = Math.atan2(lookAhead.x - target.x, lookAhead.z - target.z);
+      const dx = target.x - ai.pos.x;
+      const dz = target.z - ai.pos.z;
+      ai.pos.x += (Math.sin(ai.yaw) * 0.5 + dx * 0.8) * dt;
+      ai.pos.z += (Math.cos(ai.yaw) * 0.5 + dz * 0.8) * dt;
+      ai.pos.y = terrainHeightAt(ai.pos.x, ai.pos.z) + 1.2;
+      ai.lapProgress = ai.t;
     }
   }
 
@@ -2131,6 +2172,8 @@ canvas {
     createTerrain();
     updateLoading(50);
     createTrack();
+    updateLoading(55);
+    createTrackCones();
     updateLoading(60);
     createVegetation();
     updateLoading(70);
