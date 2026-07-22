@@ -863,6 +863,10 @@
           <h3>Supercross</h3>
           <p>Tight track, massive jumps</p>
         </div>
+        <div class="mode-card" data-mode="baja">
+          <h3>Baja</h3>
+          <p>Long-distance endurance race</p>
+        </div>
       </div>
       <button class="mode-back" id="btn-mode-back">Back</button>
     </div>
@@ -983,6 +987,55 @@
           baja: { laps: 7, trackWidth: 20, terrainScale: 2.0 },
         };
 
+        // === TRACK WAYPOINTS ===
+        const TRACK_WAYPOINTS = [
+          new THREE.Vector3(0, 0, -180),
+          new THREE.Vector3(160, 0, -140),
+          new THREE.Vector3(190, 0, -20),
+          new THREE.Vector3(130, 0, 100),
+          new THREE.Vector3(20, 0, 170),
+          new THREE.Vector3(-140, 0, 120),
+          new THREE.Vector3(-180, 0, 10),
+          new THREE.Vector3(-110, 0, -120),
+        ];
+
+        let trackCurve = null;
+        let trackPoints = [];
+
+        function buildTrackCurve() {
+          trackCurve = new THREE.CatmullRomCurve3(TRACK_WAYPOINTS, true);
+          trackPoints = [];
+          for (let i = 0; i < 200; i++) {
+            trackPoints.push(trackCurve.getPoint(i / 200));
+          }
+        }
+
+        function distToTrack(x, z) {
+          let minD = Infinity;
+          for (let i = 0; i < trackPoints.length; i++) {
+            const dx = x - trackPoints[i].x;
+            const dz = z - trackPoints[i].z;
+            const d = dx * dx + dz * dz;
+            if (d < minD) minD = d;
+          }
+          return Math.sqrt(minD);
+        }
+
+        function findNearestTrackT(x, z) {
+          let minD = Infinity;
+          let bestI = 0;
+          for (let i = 0; i < trackPoints.length; i++) {
+            const dx = x - trackPoints[i].x;
+            const dz = z - trackPoints[i].z;
+            const d = dx * dx + dz * dz;
+            if (d < minD) {
+              minD = d;
+              bestI = i;
+            }
+          }
+          return bestI / trackPoints.length;
+        }
+
         // === STATE ===
         let state = "loading"; // loading, title, countdown, racing, race_complete
         let currentMode = "national";
@@ -1019,8 +1072,6 @@
         let particles = [];
         let particlePool = [];
         let treesInst = null;
-        let trackMesh = null;
-        let trackCurve = null;
         let trackCones = null;
         let skyDome = null;
         let dirLight, ambLight;
@@ -1130,33 +1181,24 @@
             fbm(x * 0.01 * scale + 14, z * 0.01 * scale + 14, 3) * 6 +
             fbm(x * 0.03 * scale, z * 0.03 * scale, 2) * 2;
 
-          // Track path: sine-wave loop
-          const pathZ = Math.sin(x * 0.008) * 60 + Math.sin(x * 0.003) * 30;
-          const pathX = Math.cos(z * 0.008) * 50 + Math.cos(z * 0.003) * 25;
-          const dx = x - pathX;
-          const dz = z - pathX;
-          const dist = Math.sqrt(dx * dx + dz * dz);
+          // Track flattening using real track curve
           const tw = MODES[currentMode].trackWidth;
+          const dist = distToTrack(x, z);
 
           if (dist < tw) {
             const t = 1 - dist / tw;
+            // Smooth track surface — blend terrain toward flat with small bumps
             h =
-              h * (1 - t * 0.7) +
-              fbm(x * 0.005 + 100, z * 0.005 + 100, 3) * 8 * t * 0.7;
-            // Ramps and jumps on track
-            const rampPhase = Math.sin(x * 0.015 + z * 0.005);
-            if (rampPhase > 0.6) {
-              h += (rampPhase - 0.6) * t * 20;
+              h * (1 - t * 0.85) +
+              fbm(x * 0.008 + 100, z * 0.008 + 100, 2) * 3 * t * 0.85;
+            // Ramps and jumps along track
+            const rampPhase = Math.sin(x * 0.012 + z * 0.008);
+            if (rampPhase > 0.7) {
+              h += (rampPhase - 0.7) * t * 12;
             }
           }
 
           return h;
-        }
-
-        function getTrackPosition(x, z) {
-          const pathZ = Math.sin(x * 0.008) * 60 + Math.sin(x * 0.003) * 30;
-          const pathX = Math.cos(z * 0.008) * 50 + Math.cos(z * 0.003) * 25;
-          return { x: pathX, z: pathZ };
         }
 
         // === TERRAIN GENERATION ===
@@ -1261,23 +1303,64 @@
         function createTrack() {
           if (trackMesh) scene.remove(trackMesh);
           const tw = MODES[currentMode].trackWidth;
-          const R = CFG.TRACK_RADIUS;
-          const points = [];
+
+          // Build terrain-following track from the curve
           const segments = 200;
+          const trackVerts = [];
+          const trackIdx = [];
+          const trackColors = [];
+          const halfW = tw / 2;
+
           for (let i = 0; i <= segments; i++) {
-            const t = (i / segments) * Math.PI * 2;
-            const x = Math.cos(t) * R;
-            const z = Math.sin(t) * R;
-            const y = getTerrainHeight(x, z) - 0.5;
-            points.push(new THREE.Vector3(x, y, z));
+            const t = i / segments;
+            const p = trackCurve.getPoint(t);
+            const lookAhead = trackCurve.getPoint((t + 0.005) % 1);
+            const right = new THREE.Vector3(
+              lookAhead.z - p.z,
+              0,
+              -(lookAhead.x - p.x),
+            ).normalize();
+
+            // Left and right edges at terrain height
+            const lx = p.x + right.x * halfW;
+            const lz = p.z + right.z * halfW;
+            const rx = p.x - right.x * halfW;
+            const rz = p.z - right.z * halfW;
+
+            const lh = terrainHeightAt(lx, lz);
+            const rh = terrainHeightAt(rx, rz);
+
+            const baseIdx = i * 2;
+            // Left vertex
+            trackVerts.push(lx, lh, lz);
+            trackColors.push(0.55, 0.45, 0.33);
+            // Right vertex
+            trackVerts.push(rx, rh, rz);
+            trackColors.push(0.55, 0.45, 0.33);
+
+            if (i < segments) {
+              const bi = i * 2;
+              trackIdx.push(bi, bi + 1, bi + 2);
+              trackIdx.push(bi + 1, bi + 3, bi + 2);
+            }
           }
-          trackCurve = new THREE.CatmullRomCurve3(points, true);
-          console.log("TRACK: curve OK, getPoint(0)=", trackCurve.getPoint(0));
-          const tubeGeo = new THREE.TubeGeometry(trackCurve, 200, tw / 2, 16, true);
+
+          const trackGeo = new THREE.BufferGeometry();
+          trackGeo.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(trackVerts, 3),
+          );
+          trackGeo.setAttribute(
+            "color",
+            new THREE.Float32BufferAttribute(trackColors, 3),
+          );
+          trackGeo.setIndex(trackIdx);
+          trackGeo.computeVertexNormals();
+
           trackMesh = new THREE.Mesh(
-            tubeGeo,
+            trackGeo,
             new THREE.MeshStandardMaterial({
-              color: 0x8b7355,
+              vertexColors: true,
               flatShading: true,
               roughness: 1.0,
             }),
@@ -1376,9 +1459,7 @@
             let x = (Math.random() - 0.5) * size;
             let z = (Math.random() - 0.5) * size;
             const tw = MODES[currentMode].trackWidth;
-            const pathZ = Math.sin(x * 0.008) * 60 + Math.sin(x * 0.003) * 30;
-            const pathX = Math.cos(z * 0.008) * 50 + Math.cos(z * 0.003) * 25;
-            const dist = Math.sqrt((x - pathX) ** 2 + (z - pathX) ** 2);
+            const dist = distToTrack(x, z);
             if (dist < tw + 5) continue;
 
             const y = getTerrainHeight(x, z);
@@ -1614,17 +1695,18 @@
           ctx.fillStyle = "#121212";
           ctx.fillRect(0, 0, w, h);
 
-          // Track outline
+          // Track outline — draw actual track curve
           ctx.strokeStyle = "#3c3c3c";
           ctx.lineWidth = 3;
           ctx.beginPath();
           const cx = w / 2,
             cy = h / 2;
-          const scale = 0.25;
+          // Scale: world spans ~400 units, minimap is 120px
+          const scale = 0.28;
           for (let i = 0; i <= 100; i++) {
-            const t = (i / 100) * Math.PI * 2;
-            const x = cx + Math.cos(t) * CFG.TRACK_RADIUS * scale;
-            const y = cy + Math.sin(t) * CFG.TRACK_RADIUS * scale;
+            const p = trackCurve.getPoint(i / 100);
+            const x = cx + p.x * scale;
+            const y = cy + p.z * scale;
             if (i === 0) ctx.moveTo(x, y);
             else ctx.lineTo(x, y);
           }
@@ -1660,7 +1742,6 @@
           document.body.appendChild(particleCanvas);
           particleCtx = particleCanvas.getContext("2d");
           resizeParticleCanvas();
-          window.addEventListener("resize", resizeParticleCanvas);
         }
 
         function resizeParticleCanvas() {
@@ -1673,9 +1754,8 @@
           if (!particleCtx) return;
           const w = particleCanvas.width,
             h = particleCanvas.height;
-          // Trail fade
-          particleCtx.fillStyle = "rgba(0,0,0,0.05)";
-          particleCtx.fillRect(0, 0, w, h);
+          // Clear instead of trail fade — trail fade obscures the 3D canvas behind
+          particleCtx.clearRect(0, 0, w, h);
 
           for (const p of particlePool) {
             if (!p.active) continue;
@@ -1760,15 +1840,10 @@
 
         // === INPUT ===
         function initInput() {
-          console.log("=== INPUT INIT ===");
           document.addEventListener("keydown", (e) => {
             keys[e.code] = true;
-            if (state === "racing") {
-              console.log(`KEY DOWN: ${e.code} (state=${state})`);
-            }
             if (state === "title" || state === "countdown") {
               if (e.code === "Enter" || e.code === "Space") {
-                console.log(`START TRIGGERED by ${e.code} (state=${state})`);
                 playSound("click");
                 startCountdown();
               }
@@ -1875,6 +1950,7 @@
           });
           $("btn-menu").addEventListener("click", () => {
             playSound("click");
+            state = "title";
             showScreen("title");
           });
 
@@ -1916,6 +1992,7 @@
           if (name === "career") careerScreen.classList.add("active");
           if (name === "race_complete") raceComplete.classList.add("active");
           if (name === "racing") hud.classList.add("active");
+          if (name === "countdown") countdownOverlay.classList.add("active");
         }
 
         function showGarage() {
@@ -1982,6 +2059,12 @@
                 ? formatTime(career.bestLaps.supercross)
                 : "--",
             ],
+            [
+              "Best Baja",
+              career.bestLaps.baja
+                ? formatTime(career.bestLaps.baja)
+                : "--",
+            ],
           ];
           rows.forEach(([label, value]) => {
             const row = document.createElement("div");
@@ -2033,24 +2116,20 @@
         }
 
         function calculatePosition() {
-          // Simple position based on lap + checkpoint progress
-          let progress = currentLap + (checkpoints[3] ? 1 : 0);
-          let aiProgress = 0;
+          // Position based on lap + track progress vs AI
+          const playerProgress = currentLap + (bike._prevT || 0);
+          let worseCount = 0;
           for (const ai of aiBikes) {
-            aiProgress += ai.lapProgress;
+            if (ai.lapProgress > playerProgress) worseCount++;
           }
-          aiProgress /= Math.max(1, aiBikes.length);
-          const pos = Math.max(
-            1,
-            Math.min(4, Math.floor(aiProgress - progress) + 1),
-          );
+          const pos = worseCount + 1;
           const suffixes = ["st", "nd", "rd", "th"];
-          return pos + suffixes[pos - 1] + "";
+          return pos + (suffixes[pos - 1] || "th");
         }
 
         // === GAME STATE MANAGEMENT ===
         function startCountdown() {
-          console.log("=== START COUNTDOWN ===");
+          if (state === "countdown") return; // Guard against double-trigger
           state = "countdown";
           showScreen("countdown");
           countdownText.textContent = "3";
@@ -2085,12 +2164,6 @@
         }
 
         function startRace() {
-          console.log("=== START RACE ===");
-          console.log("  trackCurve exists:", !!trackCurve);
-          if (trackCurve) {
-            const spawn = trackCurve.getPoint(0);
-            console.log("  spawn point:", spawn);
-          }
           state = "racing";
           showScreen("racing");
           initAudio();
@@ -2100,10 +2173,12 @@
           airTime = 0;
           bigAirScore = 0;
           wheelieTime = 0;
+          bike._prevT = null;
 
-          // Spawn bike on track start
+          // Spawn bike on track start at terrain height
           const spawn = trackCurve.getPoint(0);
-          bike.pos.set(spawn.x, spawn.y + CFG.WHEEL_RADIUS + 1, spawn.z);
+          const spawnH = terrainHeightAt(spawn.x, spawn.z);
+          bike.pos.set(spawn.x, spawnH + CFG.WHEEL_RADIUS + 1, spawn.z);
           bike.vel.set(0, 0, 0);
           bike.yaw = Math.atan2(
             trackCurve.getPoint(0.01).x - spawn.x,
@@ -2124,7 +2199,6 @@
         function spawnAI() {
           aiBikes = [];
           const count = 3;
-          console.log("SPAWN AI: trackCurve exists:", !!trackCurve);
           for (let i = 0; i < count; i++) {
             const t = 0.85 + (i / count) * 0.1;
             const spawn = trackCurve.getPoint(t);
@@ -2135,6 +2209,7 @@
               yaw: Math.atan2(lookAhead.x - spawn.x, lookAhead.z - spawn.z),
               speed: 20 + Math.random() * 10,
               speedMult: 0.85 + Math.random() * 0.3,
+              laps: 0,
               lapProgress: 0,
               t: t,
             });
@@ -2183,9 +2258,6 @@
             steer = -1;
           if (keys["Space"]) wheelie = 1;
           if (keys["ShiftLeft"] || keys["ShiftRight"]) compress = 1;
-          console.log(
-            `PHYS: throttle=${throttle} steer=${steer} speed=${bike.speed.toFixed(1)} onGround=${bike.onGround} pos=${bike.pos.x.toFixed(0)},${bike.pos.y.toFixed(0)},${bike.pos.z.toFixed(0)}`,
-          );
 
           const bikeData = BIKES[selectedBike];
           const speedMult = bikeData.speed;
@@ -2330,51 +2402,34 @@
             bike.speed *= 0.95;
           }
 
-          // Dust particles
+          // Dust particles — spawn at terrain height, not hardcoded
           if (
             bike.onGround &&
             Math.abs(bike.speed) > 5 &&
             Math.random() < 0.3
           ) {
-            spawnDust(bike.pos.x - 1.4, 0.8, bike.pos.z, 3);
+            spawnDust(
+              bike.pos.x - 1.4,
+              terrainHeightAt(bike.pos.x, bike.pos.z),
+              bike.pos.z,
+              3,
+            );
           }
 
-          // Lap tracking
-          const angle = Math.atan2(bike.pos.x, bike.pos.z);
-          const normAngle =
-            ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-
-          if (!checkpoints[1] && normAngle > CFG.CHECKPOINT_1_ANGLE) {
-            checkpoints[1] = true;
-          }
-          if (
-            checkpoints[1] &&
-            !checkpoints[2] &&
-            normAngle > CFG.CHECKPOINT_2_ANGLE
-          ) {
-            checkpoints[2] = true;
-          }
-          if (
-            checkpoints[2] &&
-            !checkpoints[3] &&
-            normAngle > CFG.CHECKPOINT_3_ANGLE
-          ) {
-            checkpoints[3] = true;
-            currentLap++;
-            playSound("countdown");
-            if (currentLap >= MODES[currentMode].laps) {
-              finishRace();
+          // Lap tracking — use track curve progress instead of angle-based
+          const nearestT = findNearestTrackT(bike.pos.x, bike.pos.z);
+          if (nearestT !== null) {
+            // Checkpoint quarters along the track curve
+            if (!bike._prevT) bike._prevT = nearestT;
+            // Crossing from end to start = lap complete
+            if (bike._prevT > 0.9 && nearestT < 0.1) {
+              currentLap++;
+              playSound("countdown");
+              if (currentLap >= MODES[currentMode].laps) {
+                finishRace();
+              }
             }
-          }
-
-          // Reset checkpoints on crossing start
-          if (
-            checkpoints[1] &&
-            checkpoints[2] &&
-            checkpoints[3] &&
-            normAngle < CFG.CHECKPOINT_1_ANGLE * 0.5
-          ) {
-            checkpoints = [false, false, false, false];
+            bike._prevT = nearestT;
           }
 
           // Big air scoring
@@ -2399,7 +2454,8 @@
             ai.pos.x += (Math.sin(ai.yaw) * 0.5 + dx * 0.8) * dt;
             ai.pos.z += (Math.cos(ai.yaw) * 0.5 + dz * 0.8) * dt;
             ai.pos.y = terrainHeightAt(ai.pos.x, ai.pos.z) + 1.2;
-            ai.lapProgress = ai.t;
+            // lapProgress = total laps + fractional progress (e.g. 2.75 = 2.75 laps done)
+            ai.lapProgress = ai.laps + ai.t;
           }
         }
 
@@ -2481,10 +2537,6 @@
           const dt = Math.min(clock.getDelta(), 0.05);
           loopCount++;
 
-          if (state === "racing" && loopCount <= 2) {
-            console.log(`GAME LOOP #${loopCount}: state=${state}`);
-          }
-
           if (state === "racing") {
             raceTime += dt;
             updatePhysics(dt);
@@ -2495,11 +2547,13 @@
             updateHUD();
             updateEngineSound();
 
-            // Screen shake
+            // Screen shake — offset render, don't mutate camera.position
             if (shakeMag > 0) {
-              camera.position.x += (Math.random() - 0.5) * shakeMag;
-              camera.position.y += (Math.random() - 0.5) * shakeMag;
-              shakeMag *= 0.9;
+              const shakeX = (Math.random() - 0.5) * shakeMag;
+              const shakeY = (Math.random() - 0.5) * shakeMag;
+              camera.position.x += shakeX;
+              camera.position.y += shakeY;
+              shakeMag *= 0.85;
               if (shakeMag < 0.01) shakeMag = 0;
             }
 
@@ -2518,7 +2572,6 @@
 
         // === BOOT ===
         function boot() {
-          console.log("=== BOOT START ===");
           updateLoading(5);
 
           // Renderer
@@ -2530,7 +2583,7 @@
           renderer.shadowMap.enabled = true;
           renderer.shadowMap.type = THREE.PCFSoftShadowMap;
           renderer.toneMapping = THREE.ACESFilmicToneMapping;
-          renderer.toneMappingExposure = 1.0;
+          renderer.toneMappingExposure = 1.3;
           document.body.appendChild(renderer.domElement);
 
           // Scene
@@ -2568,6 +2621,8 @@
           updateLoading(10);
 
           // Create world
+          buildTrackCurve();
+          updateLoading(10);
           createSky();
           updateLoading(15);
           createTerrain();
@@ -2600,15 +2655,19 @@
             showScreen("title");
           }, 500);
 
-          // Resize handler
+          // Resize handler — debounced to avoid thrashing
+          let resizeTimer = null;
           window.addEventListener("resize", () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+              renderer.setSize(window.innerWidth, window.innerHeight);
+              camera.aspect = window.innerWidth / window.innerHeight;
+              camera.updateProjectionMatrix();
+              resizeParticleCanvas();
+            }, 150);
           });
 
           // Start loop
-          console.log("=== BOOT COMPLETE — starting game loop ===");
           gameLoop();
         }
 
