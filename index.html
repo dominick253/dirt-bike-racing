@@ -1218,7 +1218,7 @@
             for (let i = 0; i <= res; i++) {
               const idx = i + j * hmW;
               const wx = -size / 2 + i * (size / res);
-              const wz = -size / 2 + j * (size / res);
+              const wz = size / 2 - j * (size / res); // Z flipped after rotateX(-PI/2)
               const h = getTerrainHeight(wx, wz);
               verts[idx * 3 + 1] = h;
               hm[idx] = h;
@@ -1273,7 +1273,7 @@
           const hmW = window._hmW;
           const hm = window._hm;
           const gx = ((x + size / 2) / size) * res;
-          const gz = ((z + size / 2) / size) * res;
+          const gz = ((size / 2 - z) / size) * res; // Z flipped after rotateX(-PI/2)
           const ix = Math.floor(gx),
             iz = Math.floor(gz);
           if (ix < 0 || ix >= res || iz < 0 || iz >= res)
