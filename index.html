@@ -1300,74 +1300,9 @@
           return new THREE.Vector3(hL - hR, 2 * e, hD - hU).normalize();
         }
 
-        // === TRACK MESH ===
+        // === TRACK MESH (removed — terrain already has track flattened with vertex colors) ===
         function createTrack() {
-          if (trackMesh) scene.remove(trackMesh);
-          const tw = MODES[currentMode].trackWidth;
-
-          // Build terrain-following track from the curve
-          const segments = 200;
-          const trackVerts = [];
-          const trackIdx = [];
-          const trackColors = [];
-          const halfW = tw / 2;
-
-          for (let i = 0; i <= segments; i++) {
-            const t = i / segments;
-            const p = trackCurve.getPoint(t);
-            const lookAhead = trackCurve.getPoint((t + 0.005) % 1);
-            const right = new THREE.Vector3(
-              lookAhead.z - p.z,
-              0,
-              -(lookAhead.x - p.x),
-            ).normalize();
-
-            // Left and right edges at terrain height
-            const lx = p.x + right.x * halfW;
-            const lz = p.z + right.z * halfW;
-            const rx = p.x - right.x * halfW;
-            const rz = p.z - right.z * halfW;
-
-            const lh = terrainHeightAt(lx, lz);
-            const rh = terrainHeightAt(rx, rz);
-
-            const baseIdx = i * 2;
-            // Left vertex
-            trackVerts.push(lx, lh, lz);
-            trackColors.push(0.55, 0.45, 0.33);
-            // Right vertex
-            trackVerts.push(rx, rh, rz);
-            trackColors.push(0.55, 0.45, 0.33);
-
-            if (i < segments) {
-              const bi = i * 2;
-              trackIdx.push(bi, bi + 1, bi + 2);
-              trackIdx.push(bi + 1, bi + 3, bi + 2);
-            }
-          }
-
-          const trackGeo = new THREE.BufferGeometry();
-          trackGeo.setAttribute(
-            "position",
-            new THREE.Float32BufferAttribute(trackVerts, 3),
-          );
-          trackGeo.setAttribute(
-            "color",
-            new THREE.Float32BufferAttribute(trackColors, 3),
-          );
-          trackGeo.setIndex(trackIdx);
-          trackGeo.computeVertexNormals();
-
-          trackMesh = new THREE.Mesh(
-            trackGeo,
-            new THREE.MeshStandardMaterial({
-              vertexColors: true,
-              flatShading: true,
-              roughness: 1.0,
-            }),
-          );
-          trackMesh.receiveShadow = true;
-          scene.add(trackMesh);
+          // No-op: track is part of the terrain geometry
         }
 
         // === TRACK CONES ===
