@@ -2383,6 +2383,7 @@
           bike.vel.x = bike.speed * sinYaw;
           bike.vel.z = bike.speed * cosYaw;
           bike.pos.x += bike.vel.x * dt;
+          bike.pos.y += bike.vel.y * dt;
           bike.pos.z += bike.vel.z * dt;
 
           // Speed clamp
